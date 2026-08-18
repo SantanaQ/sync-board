@@ -19,7 +19,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserResponse getUser(@PathVariable UUID id) {
-
         User user = userService.getUser(id);
 
         return new UserResponse(

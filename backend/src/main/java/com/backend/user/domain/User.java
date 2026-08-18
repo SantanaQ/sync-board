@@ -22,7 +22,7 @@ public class User {
     @Column(nullable = false, name = "password_hash")
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String displayName;
 
     @CreationTimestamp

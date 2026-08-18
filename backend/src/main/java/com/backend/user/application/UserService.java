@@ -1,5 +1,6 @@
 package com.backend.user.application;
 
+import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.user.domain.User;
 import com.backend.user.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,12 @@ public class UserService {
 
     public User getUser(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id"
+                        + id
+                        + " not found"
+                        )
+                );
     }
 
 
