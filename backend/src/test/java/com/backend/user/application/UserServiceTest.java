@@ -30,7 +30,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    void should_return_user_when_user_exists() {
+    void returns_user_when_user_exists() {
         UUID id = UUID.randomUUID();
 
         User user = new User(
@@ -50,7 +50,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void should_throw_resource_not_found_exception_when_user_does_not_exist() {
+    void throws_resource_not_found_exception_when_user_does_not_exist() {
         UUID id = UUID.randomUUID();
 
         when(userRepository.findById(id))

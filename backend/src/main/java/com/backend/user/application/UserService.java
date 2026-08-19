@@ -5,6 +5,7 @@ import com.backend.user.domain.User;
 import com.backend.user.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,6 +25,10 @@ public class UserService {
                         + " not found"
                         )
                 );
+    }
+
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
 

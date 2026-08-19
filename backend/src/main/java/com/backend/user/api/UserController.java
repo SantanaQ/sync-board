@@ -5,6 +5,8 @@ import com.backend.user.application.UserService;
 import com.backend.user.domain.User;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,4 +29,22 @@ public class UserController {
                 user.email()
         );
     }
+
+    @GetMapping
+    public List<UserResponse> getUsers() {
+        List<User> users = userService.getUsers();
+        List<UserResponse> responses = new ArrayList<>();
+        for (User user : users) {
+            responses.add(new UserResponse(
+                    user.id(),
+                    user.displayName(),
+                    user.email()
+            ));
+        }
+        return responses;
+    }
+
+
+
+
 }
