@@ -43,8 +43,4 @@ public class UserController {
         }
         return responses;
     }
-
-
-
-
 }

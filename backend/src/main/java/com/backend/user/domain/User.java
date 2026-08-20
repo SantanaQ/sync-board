@@ -57,6 +57,10 @@ public class User {
         return displayName;
     }
 
+    public String passwordHash() {
+        return passwordHash;
+    }
+
     public Instant createdAt() {
         return createdAt;
     }
@@ -64,4 +68,5 @@ public class User {
     public Instant updatedAt() {
         return updatedAt;
     }
+
 }

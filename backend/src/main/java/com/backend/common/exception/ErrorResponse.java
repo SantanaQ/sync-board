@@ -1,10 +1,11 @@
 package com.backend.common.exception;
 
 import java.time.Instant;
+import java.util.Map;
 
 public record ErrorResponse(
-        int status,
         String message,
-        Instant timestamp
+        Instant timestamp,
+        Map<String, String> errors
 ) {
 }

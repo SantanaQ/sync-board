@@ -21,3 +21,6 @@ spring:
     validate-on-migrate: true
     validate-migration-naming: true
 
+jwt:
+  secret: I2bCYX797KGbFgkFEa3gl7wVfQ3/1NqASOF/cc+ijM0=
+  expirationMs: 288000000 # 8 hours
