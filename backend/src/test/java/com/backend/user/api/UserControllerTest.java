@@ -29,7 +29,7 @@ public class UserControllerTest {
     private UserService userService;
 
     @Test
-    void returns_404_when_user_does_not_exist() throws Exception {
+    void getUser_returns_404_when_user_does_not_exist() throws Exception {
 
         UUID id = UUID.randomUUID();
 
@@ -48,7 +48,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void returns_user_response_when_user_exists() throws Exception {
+    void getUser_returns_user_response_when_user_exists() throws Exception {
         User user = new User(
                 "test@example.com",
                 "user",

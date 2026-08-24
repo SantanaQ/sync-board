@@ -1,10 +1,15 @@
 package com.backend.project.domain;
 
+import com.backend.project_members.domain.MemberRole;
+import com.backend.project_members.domain.ProjectMember;
+import com.backend.user.domain.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "projects")
@@ -29,6 +34,14 @@ public class Project {
     @UpdateTimestamp
     @Column(nullable = false, name = "updated_at")
     private Instant updatedAt;
+
+    @OneToMany(
+            mappedBy = "project",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ProjectMember> members = new ArrayList<>();
 
     protected Project() {
         // JPA
@@ -60,4 +73,40 @@ public class Project {
     public Instant updatedAt() {
         return updatedAt;
     }
+
+    public List<ProjectMember> members() {
+        return members;
+    }
+
+    public ProjectMember owner() {
+        return members.stream()
+                .filter(member -> member.role() == MemberRole.OWNER)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void addMember(User user, MemberRole role) {
+        ProjectMember member = new ProjectMember(this, user, role);
+        members.add(member);
+    }
+
+    public void removeMember(ProjectMember member) {
+        members.remove(member);
+    }
+
+
+
+
 }

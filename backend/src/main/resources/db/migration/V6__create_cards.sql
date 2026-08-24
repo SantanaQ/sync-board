@@ -9,7 +9,7 @@ CREATE TABLE cards (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
 
-    FOREIGN KEY (column_id) REFERENCES board_columns(id)
+    FOREIGN KEY (column_id) REFERENCES board_columns(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_cards_column_position

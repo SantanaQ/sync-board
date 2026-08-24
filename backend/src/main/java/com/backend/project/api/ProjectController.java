@@ -1,6 +1,7 @@
 package com.backend.project.api;
 
 import com.backend.project.application.ProjectService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectResponse createProject(@RequestBody CreateProjectRequest projectRequest) {
+    public ProjectResponse createProject(@Valid @RequestBody CreateProjectRequest projectRequest) {
         return projectService.createProject(projectRequest);
     }
 
@@ -34,11 +35,15 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
-        boolean deleted = projectService.deleteProject(id);
-        if(deleted) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        projectService.deleteProject(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ProjectResponse updateProject(@PathVariable UUID id,
+                                         @Valid @RequestBody UpdateProjectRequest projectRequest) {
+        return projectService.updateProject(id, projectRequest);
     }
 
 }

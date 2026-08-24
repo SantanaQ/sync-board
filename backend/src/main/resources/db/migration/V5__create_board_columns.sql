@@ -4,7 +4,7 @@ CREATE TABLE board_columns(
     name VARCHAR(100) NOT NULL,
     position INTEGER NOT NULL,
 
-    FOREIGN KEY (board_id) REFERENCES boards(id)
+    FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_board_columns_board_id
