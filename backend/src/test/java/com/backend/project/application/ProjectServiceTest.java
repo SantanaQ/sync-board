@@ -8,9 +8,11 @@ import com.backend.project.api.ProjectResponse;
 import com.backend.project.api.UpdateProjectRequest;
 import com.backend.project.domain.Project;
 import com.backend.project.infrastructure.ProjectRepository;
+import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectMemberId;
+import com.backend.project_member.domain.ProjectPermission;
 import com.backend.project_member.infrastructure.ProjectMemberRepository;
 import com.backend.user.application.CurrentUserService;
 import com.backend.user.domain.User;
@@ -33,6 +35,9 @@ public class ProjectServiceTest {
 
     @Mock
     private CurrentUserService currentUserService;
+
+    @Mock
+    private ProjectAuthorizationService projectAuthorizationService;
 
     @Mock
     private ProjectRepository projectRepository;
@@ -90,10 +95,8 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(
-                new ProjectMemberId(projectId, currentUser.id())
-        ))
-                .thenReturn(Optional.of(member));
+        when(projectAuthorizationService.requireMembership(projectId, currentUser))
+                .thenReturn(member);
 
         when(memberRepository.findByIdProjectIdAndRole(
                 projectId,
@@ -163,13 +166,13 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(new ProjectMemberId(projectId, currentUser.id())))
-                .thenReturn(Optional.empty());
+        when(projectAuthorizationService.requireMembership(projectId, currentUser))
+                .thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> projectService.getProject(projectId))
                 .isInstanceOf(AccessDeniedException.class);
 
-        verify(memberRepository).findById(new ProjectMemberId(projectId, currentUser.id()));
+        verify(projectAuthorizationService).requireMembership(projectId, currentUser);
     }
 
     @Test
@@ -203,8 +206,8 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(new ProjectMemberId(projectId, currentUser.id())))
-                .thenReturn(Optional.of(member));
+        when(projectAuthorizationService.requireMembership(projectId, currentUser))
+                .thenReturn(member);
 
         when(memberRepository.findByIdProjectIdAndRole(projectId, MemberRole.OWNER))
                 .thenReturn(Optional.empty());
@@ -298,10 +301,9 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(
-                new ProjectMemberId(projectId, userId)
-        ))
-                .thenReturn(Optional.of(owner));
+        when(projectAuthorizationService
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE)
+        ).thenReturn(owner);
 
         when(memberRepository.findByIdProjectIdAndRole(
                 projectId,
@@ -371,11 +373,9 @@ public class ProjectServiceTest {
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(
-                new ProjectMemberId(projectId, userId)
-        ))
-                .thenReturn(Optional.of(viewer));
-
+        when(projectAuthorizationService
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE)
+        ).thenThrow(AccessDeniedException.class);
 
         UpdateProjectRequest request =
                 new UpdateProjectRequest(
@@ -386,7 +386,8 @@ public class ProjectServiceTest {
         assertThatThrownBy(() -> projectService.updateProject(projectId, request))
                 .isInstanceOf(AccessDeniedException.class);
 
-        verify(memberRepository).findById(new ProjectMemberId(projectId, userId));
+        verify(projectAuthorizationService)
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE);
     }
 
     @Test
@@ -446,11 +447,15 @@ public class ProjectServiceTest {
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(owner.id())).thenReturn(Optional.of(owner));
+        when(projectAuthorizationService
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE)
+        ).thenReturn(owner);
 
         projectService.deleteProject(projectId);
 
         verify(projectRepository).delete(project);
+        verify(projectAuthorizationService)
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE);
     }
 
     @Test
@@ -482,11 +487,15 @@ public class ProjectServiceTest {
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
-        when(memberRepository.findById(member.id())).thenReturn(Optional.of(member));
+        when(projectAuthorizationService
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE)
+        ).thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> projectService.deleteProject(projectId))
                 .isInstanceOf(AccessDeniedException.class);
 
+        verify(projectAuthorizationService)
+                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE);
         verifyNoMoreInteractions(projectRepository);
     }
 
