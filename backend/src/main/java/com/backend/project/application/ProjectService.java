@@ -1,6 +1,5 @@
 package com.backend.project.application;
 
-import com.backend.common.exception.AccessDeniedException;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.project.api.CreateProjectRequest;
 import com.backend.project.api.ProjectListResponse;
@@ -8,11 +7,11 @@ import com.backend.project.api.ProjectResponse;
 import com.backend.project.api.UpdateProjectRequest;
 import com.backend.project.domain.Project;
 import com.backend.project.infrastructure.ProjectRepository;
-import com.backend.project_members.domain.MemberRole;
-import com.backend.project_members.domain.ProjectMember;
-import com.backend.project_members.domain.ProjectMemberId;
-import com.backend.project_members.domain.ProjectPermission;
-import com.backend.project_members.infrastructure.ProjectMemberRepository;
+import com.backend.project_member.application.ProjectAuthorizationService;
+import com.backend.project_member.domain.MemberRole;
+import com.backend.project_member.domain.ProjectMember;
+import com.backend.project_member.domain.ProjectPermission;
+import com.backend.project_member.infrastructure.ProjectMemberRepository;
 import com.backend.user.api.UserResponse;
 import com.backend.user.application.CurrentUserService;
 import com.backend.user.domain.User;
@@ -29,33 +28,27 @@ public class ProjectService {
     private final CurrentUserService currentUserService;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectAuthorizationService projectAuthorizationService;
 
     public ProjectService(ProjectRepository projectRepository,
                           CurrentUserService currentUserService,
-                          ProjectMemberRepository projectMemberRepository
+                          ProjectMemberRepository projectMemberRepository,
+                          ProjectAuthorizationService projectAuthorizationService
                           ) {
         this.projectRepository = projectRepository;
         this.currentUserService = currentUserService;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectAuthorizationService = projectAuthorizationService;
+
     }
 
     public ProjectResponse getProject(UUID id) {
         User currentUser = currentUserService.get();
 
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Project with id " + id + " not found"
-                        )
-                );
+        Project project = requirePresence(id);
 
-        ProjectMember currentUserMember = projectMemberRepository
-                .findById(new ProjectMemberId(id, currentUser.id()))
-                .orElseThrow(() ->
-                        new AccessDeniedException(
-                                "You do not have access to this project"
-                        )
-                );
+        ProjectMember currentUserMember = projectAuthorizationService
+                .requireMembership(id, currentUser);
 
         return toResponse(project, currentUserMember);
     }
@@ -103,14 +96,9 @@ public class ProjectService {
     public void deleteProject(UUID id) {
         User currentUser = currentUserService.get();
 
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Project with id " + id + " not found"
-                        )
-                );
+        Project project = requirePresence(id);
 
-        requirePermission(
+        projectAuthorizationService.requirePermission(
                 id,
                 currentUser,
                 ProjectPermission.PROJECT_DELETE
@@ -122,14 +110,9 @@ public class ProjectService {
     public ProjectResponse updateProject(UUID id, UpdateProjectRequest request) {
         User currentUser = currentUserService.get();
 
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Project with id " + id + " not found"
-                        )
-                );
+        Project project = requirePresence(id);
 
-        ProjectMember membership = requirePermission(
+        ProjectMember membership = projectAuthorizationService.requirePermission(
                 id,
                 currentUser,
                 ProjectPermission.PROJECT_UPDATE
@@ -153,7 +136,7 @@ public class ProjectService {
         )
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Project has no owner"
+                                "Project has no owner."
                         )
                 );
 
@@ -174,29 +157,13 @@ public class ProjectService {
         );
     }
 
-    private ProjectMember requirePermission(
-            UUID projectId,
-            User user,
-            ProjectPermission permission
-    ) {
-        ProjectMember membership = projectMemberRepository
-                .findById(new ProjectMemberId(projectId, user.id()))
+    private Project requirePresence(UUID id) {
+        return projectRepository.findById(id)
                 .orElseThrow(() ->
-                        new AccessDeniedException(
-                                "You do not have access to this project"
+                        new ResourceNotFoundException(
+                                "Project with id " + id + " not found."
                         )
                 );
-
-        if (!membership.hasPermission(permission)) {
-            throw new AccessDeniedException(
-                    "You do not have permission to perform this action"
-            );
-        }
-
-        return membership;
     }
-
-
-
 
 }

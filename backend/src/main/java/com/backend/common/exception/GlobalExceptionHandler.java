@@ -94,4 +94,16 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(UnauthorizedOperationException.class)
+    public ResponseEntity<ErrorResponse> unauthorizedOperation(UnauthorizedOperationException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                Instant.now(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(response);
+    }
+
 }

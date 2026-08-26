@@ -22,7 +22,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User with id"
                         + id
-                        + " not found"
+                        + " not found."
                         )
                 );
     }

@@ -1,7 +1,8 @@
 package com.backend.project.domain;
 
-import com.backend.project_members.domain.MemberRole;
-import com.backend.project_members.domain.ProjectMember;
+import com.backend.board.domain.Board;
+import com.backend.project_member.domain.MemberRole;
+import com.backend.project_member.domain.ProjectMember;
 import com.backend.user.domain.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -43,6 +44,14 @@ public class Project {
     )
     private List<ProjectMember> members = new ArrayList<>();
 
+    @OneToMany(
+        mappedBy = "project",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    private List<Board> boards = new ArrayList<>();
+
     protected Project() {
         // JPA
     }
@@ -83,6 +92,10 @@ public class Project {
                 .filter(member -> member.role() == MemberRole.OWNER)
                 .findFirst()
                 .orElseThrow();
+    }
+
+    public List<Board> boards() {
+        return boards;
     }
 
     public void setName(String name) {

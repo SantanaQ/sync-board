@@ -1,6 +1,6 @@
 package com.backend.project.api;
 
-import com.backend.project_members.domain.MemberRole;
+import com.backend.project_member.domain.MemberRole;
 
 import java.time.Instant;
 import java.util.UUID;

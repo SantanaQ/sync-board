@@ -42,7 +42,7 @@ public class AuthService {
 
         if (userRepository.existsByEmail(request.email())) {
             throw new ResourceAlreadyExistsException(
-                    "Email already exists"
+                    "Invalid email or password."
             );
         }
 
@@ -86,7 +86,7 @@ public class AuthService {
 
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException(
-                    "Wrong password or email"
+                    "Wrong email or password."
             );
         }
     }

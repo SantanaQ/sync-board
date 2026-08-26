@@ -1,4 +1,4 @@
-package com.backend.project_members.domain;
+package com.backend.project_member.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

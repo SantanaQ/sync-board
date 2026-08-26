@@ -1,4 +1,4 @@
-package com.backend.project_members.domain;
+package com.backend.project_member.domain;
 
 import com.backend.project.domain.Project;
 import com.backend.user.domain.User;
@@ -58,6 +58,10 @@ public class ProjectMember {
 
     public boolean hasPermission(ProjectPermission permission) {
         return role.hasPermission(permission);
+    }
+
+    public void setRole(MemberRole role) {
+        this.role = role;
     }
 
 }
