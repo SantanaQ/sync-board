@@ -1,6 +1,7 @@
 package com.backend.user.application;
 
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.user.api.UserResponse;
 import com.backend.user.domain.User;
 import com.backend.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,11 @@ public class UserServiceTest {
         when(userRepository.findById(id))
                 .thenReturn(Optional.of(user));
 
-        User result = userService.getUser(id);
+        UserResponse result = userService.getUser(id);
 
-        assertThat(result).isSameAs(user);
+        assertThat(result.displayName()).isEqualTo(user.displayName());
+
+        assertThat(result.email()).isEqualTo(user.email());
 
         verify(userRepository).findById(id);
     }

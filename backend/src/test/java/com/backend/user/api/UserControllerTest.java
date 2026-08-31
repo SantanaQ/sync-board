@@ -58,7 +58,11 @@ public class UserControllerTest {
         UUID id = UUID.randomUUID();
 
         when(userService.getUser(id))
-                .thenReturn(user);
+                .thenReturn(new UserResponse(
+                        id,
+                        user.displayName(),
+                        user.email()
+                ));
 
         mockMvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().isOk())

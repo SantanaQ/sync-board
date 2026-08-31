@@ -11,7 +11,6 @@ import com.backend.project.infrastructure.ProjectRepository;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
-import com.backend.project_member.domain.ProjectMemberId;
 import com.backend.project_member.domain.ProjectPermission;
 import com.backend.project_member.infrastructure.ProjectMemberRepository;
 import com.backend.user.application.CurrentUserService;

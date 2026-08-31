@@ -54,7 +54,7 @@ public class ProjectMemberService {
 
         projectAuthorizationService.requireMembership(projectId, currentUser);
 
-        return projectMemberRepository.findAllByProjectIdWithUser(projectId)
+        return projectMemberRepository.findAllByProjectId(projectId)
                 .stream()
                 .map(projectMember -> new ProjectMemberResponse(
                         new UserResponse(

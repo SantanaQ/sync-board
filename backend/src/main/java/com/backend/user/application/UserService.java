@@ -1,11 +1,11 @@
 package com.backend.user.application;
 
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.user.api.UserResponse;
 import com.backend.user.domain.User;
 import com.backend.user.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,17 +17,17 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUser(UUID id) {
-        return userRepository.findById(id)
+    public UserResponse getUser(UUID id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User with id"
-                        + id
-                        + " not found."
+                                "User with id" + id + " not found."
                         )
                 );
+        return new UserResponse(
+                user.id(),
+                user.displayName(),
+                user.email()
+        );
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
 }
