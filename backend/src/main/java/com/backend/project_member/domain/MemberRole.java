@@ -16,7 +16,11 @@ public enum MemberRole {
 
                     MEMBER_ADD,
                     MEMBER_REMOVE,
-                    MEMBER_UPDATE
+                    MEMBER_UPDATE,
+
+                    COLUMN_CREATE,
+                    COLUMN_DELETE,
+                    COLUMN_UPDATE
             )
     ),
     ADMIN(
@@ -29,7 +33,11 @@ public enum MemberRole {
 
                     MEMBER_ADD,
                     MEMBER_REMOVE,
-                    MEMBER_UPDATE
+                    MEMBER_UPDATE,
+
+                    COLUMN_CREATE,
+                    COLUMN_DELETE,
+                    COLUMN_UPDATE
             )
     ),
     MEMBER(

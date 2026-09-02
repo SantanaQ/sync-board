@@ -5,7 +5,6 @@ import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectMemberId;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
