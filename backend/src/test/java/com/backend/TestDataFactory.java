@@ -2,7 +2,6 @@ package com.backend;
 
 import com.backend.board.domain.Board;
 import com.backend.board_column.api.CreateBoardColumnRequest;
-import com.backend.board_column.api.ReorderBoardColumnRequest;
 import com.backend.board_column.api.UpdateBoardColumnRequest;
 import com.backend.board_column.domain.BoardColumn;
 import com.backend.project.domain.Project;
