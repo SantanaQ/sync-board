@@ -42,4 +42,13 @@ public interface BoardColumnRepository extends JpaRepository<BoardColumn, UUID> 
     )
     Optional<BoardColumn> findInHierarchy(UUID projectId, UUID boardId, UUID columnId);
 
+    @Query(
+            """
+            select count(bc)
+            from BoardColumn bc
+            where bc.board.id = :boardId
+                and bc.board.project.id = :projectId
+            """
+    )
+    int countByBoardIdAndProjectId(UUID boardId, UUID projectId);
 }

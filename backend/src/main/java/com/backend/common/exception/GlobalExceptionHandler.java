@@ -106,4 +106,16 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(BusinessRuleViolationException.class)
+    public ResponseEntity<ErrorResponse> businessRuleViolation(BusinessRuleViolationException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                Instant.now(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
 }
