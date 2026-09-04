@@ -3,7 +3,7 @@ CREATE TABLE cards (
     column_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    position INTEGER NOT NULL,
+    position NUMERIC(30, 10) NOT NULL,
     version BIGINT NOT NULL DEFAULT 0,
 
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,

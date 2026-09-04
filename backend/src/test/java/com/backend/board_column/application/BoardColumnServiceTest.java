@@ -10,7 +10,6 @@ import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
 import com.backend.common.exception.AccessDeniedException;
 import com.backend.common.exception.ResourceNotFoundException;
-import com.backend.project.domain.Project;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
@@ -105,14 +104,14 @@ public class BoardColumnServiceTest {
         when(projectAuthorizationService.requireMembership(projectId, user))
                 .thenReturn(owner);
 
-        when(boardColumnRepository.findAllByBoardIdAndProjectId(boardId, projectId))
+        when(boardColumnRepository.findAllInHierarchy(boardId, projectId))
                 .thenReturn(List.of(column1, column2));
 
         List<BoardColumnResponse> boardCols = boardColumnService.getColumns(projectId, boardId);
 
         assertThat(boardCols.size()).isEqualTo(2);
 
-        verify(boardColumnRepository).findAllByBoardIdAndProjectId(boardId, projectId);
+        verify(boardColumnRepository).findAllInHierarchy(boardId, projectId);
     }
 
     @Test

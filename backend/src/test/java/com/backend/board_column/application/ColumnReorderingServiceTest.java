@@ -458,7 +458,7 @@ public class ColumnReorderingServiceTest {
         when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
                 .thenReturn(Optional.of(column));
 
-        when(boardColumnRepository.countByBoardIdAndProjectId(boardId, projectId))
+        when(boardColumnRepository.countInHierarchy(boardId, projectId))
                 .thenReturn(2);
 
         ReorderBoardColumnRequest request
@@ -501,7 +501,7 @@ public class ColumnReorderingServiceTest {
         when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
                 .thenReturn(Optional.of(column));
 
-        when(boardColumnRepository.countByBoardIdAndProjectId(boardId, projectId))
+        when(boardColumnRepository.countInHierarchy(boardId, projectId))
                 .thenReturn(0);
 
         ReorderBoardColumnRequest request
@@ -737,7 +737,7 @@ public class ColumnReorderingServiceTest {
         when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
                 .thenReturn(Optional.of(afterColumn));
 
-        when(boardColumnRepository.findAllByBoardIdAndProjectId(boardId, projectId))
+        when(boardColumnRepository.findAllInHierarchy(boardId, projectId))
                 .thenReturn(List.of(beforeColumn, afterColumn, column));
 
         ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);

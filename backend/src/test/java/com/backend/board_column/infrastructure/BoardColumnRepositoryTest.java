@@ -2,7 +2,6 @@ package com.backend.board_column.infrastructure;
 
 import com.backend.RepoTestDataFactory;
 import com.backend.RepositoryTestConfig;
-import com.backend.TestDataFactory;
 import com.backend.board.domain.Board;
 import com.backend.board.infrastructure.BoardRepository;
 import com.backend.board_column.domain.BoardColumn;
@@ -47,7 +46,7 @@ public class BoardColumnRepositoryTest extends RepositoryTestConfig {
         boardColumnRepository.save(column3);
 
         List<BoardColumn> cols
-                = boardColumnRepository.findAllByBoardIdAndProjectId(board.id(), project.id());
+                = boardColumnRepository.findAllInHierarchy(board.id(), project.id());
 
         assertThat(cols.get(0).position().compareTo(cols.get(1).position())).isLessThan(0);
         assertThat(cols.get(1).position().compareTo(cols.get(2).position())).isLessThan(0);
@@ -149,7 +148,7 @@ public class BoardColumnRepositoryTest extends RepositoryTestConfig {
     }
 
     @Test
-    void countByBoardIdAndProjectId_returns_number_of_columns() {
+    void countInHierarchy_returns_number_of_columns() {
         Project project = RepoTestDataFactory.project();
 
         Board board = RepoTestDataFactory.board(project);
@@ -164,7 +163,7 @@ public class BoardColumnRepositoryTest extends RepositoryTestConfig {
         boardColumnRepository.save(column2);
         boardColumnRepository.save(column3);
 
-        int count = boardColumnRepository.countByBoardIdAndProjectId(board.id(), project.id());
+        int count = boardColumnRepository.countInHierarchy(board.id(), project.id());
 
         assertThat(count).isEqualTo(3);
     }

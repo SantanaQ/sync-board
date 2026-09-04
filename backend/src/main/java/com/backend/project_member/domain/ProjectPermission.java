@@ -15,6 +15,10 @@ public enum ProjectPermission {
 
     COLUMN_CREATE,
     COLUMN_DELETE,
-    COLUMN_UPDATE;
+    COLUMN_UPDATE,
+
+    CARD_CREATE,
+    CARD_DELETE,
+    CARD_UPDATE,
 }
 

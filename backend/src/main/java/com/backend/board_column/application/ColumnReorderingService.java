@@ -6,6 +6,8 @@ import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
 import com.backend.common.exception.BusinessRuleViolationException;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.reordering.PositionCalculator;
+import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
 import com.backend.user.application.CurrentUserService;
@@ -14,7 +16,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ public class ColumnReorderingService {
 
     private final CurrentUserService currentUserService;
     private final ProjectAuthorizationService projectAuthorizationService;
+    private final ReorderingService<BoardColumn> reorderingService;
 
     private final BoardColumnRepository boardColumnRepository;
 
@@ -36,6 +38,12 @@ public class ColumnReorderingService {
         this.boardColumnRepository = boardColumnRepository;
         this.currentUserService = currentUserService;
         this.projectAuthorizationService = projectAuthorizationService;
+        PositionCalculator posCalculator = new PositionCalculator(
+                MIN_POSITION_GAP,
+                POSITION_PADDING,
+                POSITION_SCALE
+        );
+        this.reorderingService = new ReorderingService<>(posCalculator);
     }
 
     @Transactional
@@ -61,63 +69,24 @@ public class ColumnReorderingService {
                 ? requirePresence(projectId, boardId, request.afterColumnId())
                 : null;
 
-        validateNeighbors(column, before, after);
+        reorderingService.validateNeighbors(column, before, after);
 
-        BigDecimal newPosition;
+        int colCount = boardColumnRepository.countInHierarchy(boardId, projectId);
 
-        if (before == null && after == null) {
-            if (boardColumnRepository.countByBoardIdAndProjectId(boardId, projectId) > 1) {
-                throw new BusinessRuleViolationException(
-                        "Before or after column must be provided when the board contains multiple columns"
-                );
-            }
-
-            // only column on board
-            newPosition = POSITION_PADDING;
-
-        } else if (before == null) {
-            // move to first position
-            newPosition = after.position()
-                    .subtract(POSITION_PADDING);
-
-        } else if (after == null) {
-            // move to last position
-            newPosition = before.position()
-                    .add(POSITION_PADDING);
-
-        } else {
-            BigDecimal gap = after.position()
-                    .subtract(before.position());
-
-            if (gap.compareTo(MIN_POSITION_GAP) <= 0) {
-                rebalanceBoard(projectId, boardId);
-
-                before = requirePresence(
-                        projectId, boardId, before.id()
-                );
-
-                after = requirePresence(
-                        projectId, boardId, after.id()
-                );
-            }
-
-            newPosition = before.position()
-                    .add(after.position())
-                    .divide(
-                            BigDecimal.TWO,
-                            POSITION_SCALE,
-                            RoundingMode.HALF_UP
-                    );
-        }
-
-        column.setPosition(newPosition);
+        reorderingService.reorder(
+                column,
+                before,
+                after,
+                colCount,
+                () -> rebalance(projectId, boardId)
+        );
 
         return toResponse(column);
     }
 
-    private void rebalanceBoard(UUID projectId, UUID boardId) {
+    private void rebalance(UUID projectId, UUID boardId) {
         List<BoardColumn> cols = boardColumnRepository
-                .findAllByBoardIdAndProjectId(boardId, projectId);
+                .findAllInHierarchy(boardId, projectId);
 
         int pos = POSITION_PADDING.intValue();
         for(BoardColumn col : cols) {
@@ -131,38 +100,6 @@ public class ColumnReorderingService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Column with id " + columnId + " not found")
                 );
-    }
-
-    private void validateNeighbors(BoardColumn column, BoardColumn before, BoardColumn after) {
-        if (before != null && before.id().equals(column.id())) {
-            throw new BusinessRuleViolationException(
-                    "Column cannot be its own predecessor"
-            );
-        }
-
-        if (after != null && after.id().equals(column.id())) {
-            throw new BusinessRuleViolationException(
-                    "Column cannot be its own successor"
-            );
-        }
-
-        if (before != null
-                && after != null
-                && before.id().equals(after.id())) {
-            throw new BusinessRuleViolationException(
-                    "Before and after column must be different"
-            );
-        }
-
-        if(before != null
-                && after != null
-                && before.position().compareTo(after.position()) >= 0) {
-
-            throw new BusinessRuleViolationException(
-                    "Before column must be positioned before after column"
-            );
-        }
-
     }
 
     private BoardColumnResponse toResponse(BoardColumn column) {

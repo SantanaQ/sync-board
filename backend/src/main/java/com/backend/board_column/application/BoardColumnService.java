@@ -44,7 +44,7 @@ public class BoardColumnService {
         projectAuthorizationService.requireMembership(projectId, currentUser);
 
         return boardColumnRepository
-                .findAllByBoardIdAndProjectId(boardId, projectId).stream()
+                .findAllInHierarchy(boardId, projectId).stream()
                 .map(boardColumn -> new BoardColumnResponse(
                         boardColumn.id(),
                         boardColumn.name(),

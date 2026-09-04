@@ -20,7 +20,7 @@ public interface BoardColumnRepository extends JpaRepository<BoardColumn, UUID> 
             order by bc.position asc
             """
     )
-    List<BoardColumn> findAllByBoardIdAndProjectId(UUID boardId, UUID projectId);
+    List<BoardColumn> findAllInHierarchy(UUID boardId, UUID projectId);
 
     @Query(
             """
@@ -50,5 +50,5 @@ public interface BoardColumnRepository extends JpaRepository<BoardColumn, UUID> 
                 and bc.board.project.id = :projectId
             """
     )
-    int countByBoardIdAndProjectId(UUID boardId, UUID projectId);
+    int countInHierarchy(UUID boardId, UUID projectId);
 }

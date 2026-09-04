@@ -1,6 +1,7 @@
 package com.backend.board_column.domain;
 
 import com.backend.board.domain.Board;
+import com.backend.common.reordering.Reorderable;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -8,7 +9,7 @@ import java.util.UUID;
 
 @Table(name = "board_columns")
 @Entity
-public class BoardColumn {
+public class BoardColumn implements Reorderable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,10 +48,12 @@ public class BoardColumn {
         return name;
     }
 
+    @Override
     public BigDecimal position() {
         return position;
     }
 
+    @Override
     public void setPosition(BigDecimal position) {
         this.position = position;
     }
