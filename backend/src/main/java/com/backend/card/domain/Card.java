@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -37,7 +36,7 @@ public class Card implements Reorderable {
     private BigDecimal position;
 
     @Column
-    private BigInteger version;
+    private Long version;
 
     @CreationTimestamp
     @Column(nullable = false, name = "created_at")
@@ -56,7 +55,7 @@ public class Card implements Reorderable {
         this.title = title;
         this.description = description;
         this.position = position;
-        this.version = BigInteger.ONE;
+        this.version = 1L;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
     }
@@ -82,7 +81,7 @@ public class Card implements Reorderable {
         return position;
     }
 
-    public BigInteger version() {
+    public long version() {
         return version;
     }
 
@@ -107,7 +106,7 @@ public class Card implements Reorderable {
         this.position = position;
     }
 
-    public void setVersion(BigInteger version) {
+    public void setVersion(long version) {
         this.version = version;
     }
 

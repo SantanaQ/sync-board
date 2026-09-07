@@ -10,9 +10,6 @@ import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.project.domain.Project;
 import com.backend.project.infrastructure.ProjectRepository;
 import com.backend.project_member.application.ProjectAuthorizationService;
-import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -25,25 +22,22 @@ import static com.backend.project_member.domain.ProjectPermission.*;
 @Service
 public class BoardService {
 
-    private final CurrentUserService currentUserService;
     private final BoardRepository boardRepository;
     private final ProjectAuthorizationService projectAuthorizationService;
     private final ProjectRepository projectRepository;
 
-    public BoardService(CurrentUserService currentUserService,
-                        BoardRepository boardRepository,
-                        ProjectAuthorizationService projectAuthorizationService,
-                        ProjectRepository projectRepository) {
-        this.currentUserService = currentUserService;
+    public BoardService(
+            BoardRepository boardRepository,
+            ProjectAuthorizationService projectAuthorizationService,
+            ProjectRepository projectRepository)
+    {
         this.boardRepository = boardRepository;
         this.projectAuthorizationService = projectAuthorizationService;
         this.projectRepository = projectRepository;
     }
 
     public List<BoardListResponse> getBoards(UUID projectId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requireMembership(projectId, currentUser);
+        projectAuthorizationService.requirePermission(projectId, BOARD_VIEW);
 
         return boardRepository.findAllByProjectId(projectId)
                 .stream()
@@ -56,9 +50,7 @@ public class BoardService {
     }
 
     public BoardResponse getBoard(UUID projectId, UUID boardId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requireMembership(projectId, currentUser);
+        projectAuthorizationService.requirePermission(projectId, BOARD_VIEW);
 
         Board board = requirePresence(boardId, projectId);
 
@@ -69,14 +61,13 @@ public class BoardService {
         );
     }
 
-    public BoardResponse updateBoard(UUID projectId, UUID boardId, UpdateBoardRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.BOARD_UPDATE
-        );
+    @Transactional
+    public BoardResponse updateBoard(
+            UUID projectId,
+            UUID boardId,
+            UpdateBoardRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, BOARD_UPDATE);
 
         Board board = requirePresence(boardId, projectId);
         board.setName(request.name());
@@ -89,14 +80,9 @@ public class BoardService {
         );
     }
 
+    @Transactional
     public BoardResponse createBoard(UUID projectId, CreateBoardRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                BOARD_CREATE
-        );
+        projectAuthorizationService.requirePermission(projectId, BOARD_CREATE);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() ->
@@ -121,13 +107,7 @@ public class BoardService {
 
     @Transactional
     public void deleteBoard(UUID projectId, UUID boardId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                BOARD_DELETE
-        );
+        projectAuthorizationService.requirePermission(projectId, BOARD_DELETE);
 
         Board board = requirePresence(boardId, projectId);
 

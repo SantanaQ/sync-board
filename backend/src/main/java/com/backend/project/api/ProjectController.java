@@ -24,7 +24,9 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectResponse createProject(@Valid @RequestBody CreateProjectRequest projectRequest) {
+    public ProjectResponse createProject(
+            @Valid @RequestBody CreateProjectRequest projectRequest
+    ) {
         return projectService.createProject(projectRequest);
     }
 
@@ -41,8 +43,10 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ProjectResponse updateProject(@PathVariable UUID id,
-                                         @Valid @RequestBody UpdateProjectRequest projectRequest) {
+    public ProjectResponse updateProject(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateProjectRequest projectRequest
+    ) {
         return projectService.updateProject(id, projectRequest);
     }
 

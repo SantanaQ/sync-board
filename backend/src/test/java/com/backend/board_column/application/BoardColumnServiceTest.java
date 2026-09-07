@@ -14,8 +14,6 @@ import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,9 +33,6 @@ import static org.mockito.Mockito.*;
 public class BoardColumnServiceTest {
 
     @Mock
-    private CurrentUserService currentUserService;
-
-    @Mock
     private ProjectAuthorizationService projectAuthorizationService;
 
     @Mock
@@ -52,15 +47,9 @@ public class BoardColumnServiceTest {
     @Test
     void getColumns_throws_access_denied_if_user_is_not_member_of_project() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_VIEW))
                 .thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> boardColumnService.getColumns(projectId, boardId))
@@ -74,8 +63,6 @@ public class BoardColumnServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
-
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
@@ -97,11 +84,7 @@ public class BoardColumnServiceTest {
                 BigDecimal.valueOf(2000)
         );
 
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_VIEW))
                 .thenReturn(owner);
 
         when(boardColumnRepository.findAllInHierarchy(boardId, projectId))
@@ -117,16 +100,10 @@ public class BoardColumnServiceTest {
     @Test
     void createColumn_throws_access_denied_if_user_does_not_have_permission() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
-
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_CREATE)
         ).thenThrow(AccessDeniedException.class);
 
@@ -143,16 +120,11 @@ public class BoardColumnServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_CREATE)
         ).thenReturn(owner);
 
@@ -169,7 +141,6 @@ public class BoardColumnServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(userId, userId, MemberRole.OWNER);
 
@@ -182,12 +153,8 @@ public class BoardColumnServiceTest {
                 "col",
                 BigDecimal.valueOf(1000));
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_CREATE)
         ).thenReturn(owner);
 
@@ -211,17 +178,11 @@ public class BoardColumnServiceTest {
     @Test
     void updateColumn_throws_access_denied_if_user_does_not_have_permission() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
-
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenThrow(AccessDeniedException.class);
 
@@ -240,16 +201,12 @@ public class BoardColumnServiceTest {
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -267,7 +224,6 @@ public class BoardColumnServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(userId, userId, MemberRole.OWNER);
 
@@ -280,12 +236,8 @@ public class BoardColumnServiceTest {
                 "col",
                 BigDecimal.valueOf(1000));
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -312,17 +264,11 @@ public class BoardColumnServiceTest {
     @Test
     void deleteColumn_throws_access_denied_if_user_does_not_have_permission() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
-
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_DELETE)
         ).thenThrow(AccessDeniedException.class);
 
@@ -338,16 +284,11 @@ public class BoardColumnServiceTest {
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_DELETE)
         ).thenReturn(owner);
 
@@ -364,7 +305,6 @@ public class BoardColumnServiceTest {
         UUID userId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-        User user = TestDataFactory.user(userId);
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
@@ -377,12 +317,8 @@ public class BoardColumnServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_DELETE)
         ).thenReturn(owner);
 

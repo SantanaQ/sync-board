@@ -15,8 +15,6 @@ import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,9 +33,6 @@ import static org.mockito.Mockito.*;
 public class BoardServiceTest {
 
     @Mock
-    private CurrentUserService currentUserService;
-
-    @Mock
     private ProjectAuthorizationService projectAuthorizationService;
 
     @Mock
@@ -51,20 +46,9 @@ public class BoardServiceTest {
 
     @Test
     void getBoards_throws_access_denied_if_user_not_member_of_project() {
-        UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_VIEW))
                 .thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> boardService.getBoards(projectId))
@@ -76,13 +60,6 @@ public class BoardServiceTest {
     @Test
     void getBoards_returns_all_project_boards() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
 
         Project project = TestDataFactory.project(
@@ -96,12 +73,9 @@ public class BoardServiceTest {
           new Board("board2", project)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_VIEW))
                 .thenReturn(owner);
 
         when(boardRepository.findAllByProjectId(projectId))
@@ -116,21 +90,10 @@ public class BoardServiceTest {
 
     @Test
     void getBoard_throws_access_denied_if_user_is_not_member_of_project() {
-        UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_VIEW))
                 .thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> boardService.getBoard(projectId, boardId))
@@ -142,22 +105,12 @@ public class BoardServiceTest {
     @Test
     void getBoard_throws_resource_not_found_if_board_not_found() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_VIEW))
                 .thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))
@@ -174,23 +127,13 @@ public class BoardServiceTest {
     @Test
     void getBoard_returns_board_when_present_for_user() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
         Board board = TestDataFactory.board(boardId, projectId, "board");
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requireMembership(projectId, user))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_VIEW))
                 .thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))
@@ -203,22 +146,11 @@ public class BoardServiceTest {
 
     @Test
     void updateBoard_throws_access_denied_if_user_does_not_have_permission() {
-        UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_UPDATE)
+        when(projectAuthorizationService
+                .requirePermission(projectId, ProjectPermission.BOARD_UPDATE)
         ).thenThrow(AccessDeniedException.class);
 
         UpdateBoardRequest request = new UpdateBoardRequest("updatedName");
@@ -230,23 +162,13 @@ public class BoardServiceTest {
     @Test
     void updateBoard_throws_resource_not_found_if_board_not_found() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_UPDATE)
+                requirePermission(projectId, ProjectPermission.BOARD_UPDATE)
         ).thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))
@@ -261,13 +183,6 @@ public class BoardServiceTest {
     @Test
     void updateBoard_updates_board_under_valid_conditions() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
@@ -275,11 +190,8 @@ public class BoardServiceTest {
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_UPDATE)
+                requirePermission(projectId, ProjectPermission.BOARD_UPDATE)
         ).thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))
@@ -294,21 +206,10 @@ public class BoardServiceTest {
 
     @Test
     void createBoard_throws_access_denied_if_user_does_not_have_permission() {
-        UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_CREATE)
+                requirePermission(projectId, ProjectPermission.BOARD_CREATE)
         ).thenThrow(AccessDeniedException.class);
 
         CreateBoardRequest request = new CreateBoardRequest("createdName");
@@ -321,22 +222,12 @@ public class BoardServiceTest {
     @Test
     void createBoard_throws_resource_not_found_if_project_not_found() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_CREATE)
+                requirePermission(projectId, ProjectPermission.BOARD_CREATE)
         ).thenReturn(owner);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
@@ -351,13 +242,6 @@ public class BoardServiceTest {
     @Test
     void createBoard_creates_board_under_valid_conditions() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
@@ -365,11 +249,8 @@ public class BoardServiceTest {
         UUID boardId = UUID.randomUUID();
         Board board = TestDataFactory.board(boardId, projectId, "board");
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_CREATE)
+                requirePermission(projectId, ProjectPermission.BOARD_CREATE)
         ).thenReturn(owner);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(owner.project()));
@@ -385,22 +266,11 @@ public class BoardServiceTest {
 
     @Test
     void deleteBoard_throws_access_denied_if_user_does_not_have_permission() {
-        UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.
-                requirePermission(projectId, user, ProjectPermission.BOARD_DELETE)
+                requirePermission(projectId, ProjectPermission.BOARD_DELETE)
         ).thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> boardService.deleteBoard(projectId, boardId))
@@ -412,22 +282,12 @@ public class BoardServiceTest {
     @Test
     void deleteBoard_throws_resource_not_found_if_board_not_found() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requirePermission(projectId, user, ProjectPermission.BOARD_DELETE))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_DELETE))
                 .thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))
@@ -440,13 +300,6 @@ public class BoardServiceTest {
     @Test
     void deleteBoard_deletes_board_under_valid_conditions() {
         UUID userId = UUID.randomUUID();
-        User user = TestDataFactory.user(
-                userId,
-                "user@email.com",
-                "user",
-                "password"
-        );
-
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
 
@@ -454,10 +307,7 @@ public class BoardServiceTest {
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
-        when(projectAuthorizationService.requirePermission(projectId, user, ProjectPermission.BOARD_DELETE))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.BOARD_DELETE))
                 .thenReturn(owner);
 
         when(boardRepository.findByIdAndProjectId(boardId, projectId))

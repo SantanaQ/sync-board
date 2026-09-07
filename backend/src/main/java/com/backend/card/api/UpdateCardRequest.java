@@ -10,6 +10,7 @@ public record UpdateCardRequest(
 
         String description,
 
+        @NotBlank
         BigInteger version
 ) {
 }

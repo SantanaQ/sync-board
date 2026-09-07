@@ -24,29 +24,37 @@ public class ProjectMemberController {
     }
 
     @GetMapping("/{userId}")
-    public ProjectMemberResponse getMember(@PathVariable UUID projectId,
-                                           @PathVariable UUID userId) {
+    public ProjectMemberResponse getMember(
+            @PathVariable UUID projectId,
+            @PathVariable UUID userId
+    ) {
         return projectMemberService.getMember(projectId, userId);
     }
 
     @PostMapping
-    public ProjectMemberResponse addMember(@PathVariable UUID projectId,
-                                           @Valid @RequestBody AddMemberRequest request) {
+    public ProjectMemberResponse addMember(
+            @PathVariable UUID projectId,
+            @Valid @RequestBody AddMemberRequest request
+    ) {
         return projectMemberService.addMember(projectId, request);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> removeMember(@PathVariable UUID projectId,
-                                       @PathVariable UUID userId) {
+    public ResponseEntity<Void> removeMember(
+            @PathVariable UUID projectId,
+            @PathVariable UUID userId
+    ) {
         projectMemberService.removeMember(projectId, userId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{userId}")
-    public ProjectMemberResponse updateMember(@PathVariable UUID projectId,
-                                              @PathVariable UUID userId,
-                                              @Valid @RequestBody UpdateMemberRequest request) {
+    public ProjectMemberResponse updateMember(
+            @PathVariable UUID projectId,
+            @PathVariable UUID userId,
+            @Valid @RequestBody UpdateMemberRequest request
+    ) {
         return projectMemberService.updateMember(projectId, userId, request);
     }
 

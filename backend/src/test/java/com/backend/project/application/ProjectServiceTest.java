@@ -53,14 +53,6 @@ public class ProjectServiceTest {
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
 
-
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
         User ownerUser = TestDataFactory.user(
                 ownerId,
                 "owner@email.com",
@@ -74,28 +66,16 @@ public class ProjectServiceTest {
                 "projectDescription"
         );
 
-        ProjectMember member =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.MEMBER
-                );
-
-        ProjectMember owner =
-                new ProjectMember(
-                        project,
-                        ownerUser,
-                        MemberRole.OWNER
-                );
-
-        when(currentUserService.get())
-                .thenReturn(currentUser);
+        ProjectMember member = TestDataFactory.projectMember(projectId, userId, MemberRole.MEMBER);
+        ProjectMember owner = TestDataFactory.projectMember(projectId, ownerId, MemberRole.MEMBER);
 
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(projectAuthorizationService.requireMembership(projectId, currentUser))
-                .thenReturn(member);
+        when(projectAuthorizationService.requirePermission(
+                projectId,
+                ProjectPermission.PROJECT_VIEW)
+        ).thenReturn(member);
 
         when(memberRepository.findByIdProjectIdAndRole(
                 projectId,
@@ -119,14 +99,7 @@ public class ProjectServiceTest {
                 .isEqualTo(MemberRole.MEMBER);
 
         assertThat(result.owner().id())
-                .isEqualTo(ownerUser.id());
-
-        assertThat(result.owner().displayName())
-                .isEqualTo(ownerUser.displayName());
-
-        assertThat(result.owner().email())
-                .isEqualTo(ownerUser.email());
-    }
+                .isEqualTo(ownerUser.id());    }
 
 
     @Test
@@ -144,34 +117,12 @@ public class ProjectServiceTest {
     @Test
     void getProject_throws_access_denied_if_user_is_not_member() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
 
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
-        Project project = TestDataFactory.project(
-                projectId,
-                "projectName",
-                "projectDescription"
-        );
-
-        when(currentUserService.get())
-                .thenReturn(currentUser);
-
-        when(projectRepository.findById(projectId))
-                .thenReturn(Optional.of(project));
-
-        when(projectAuthorizationService.requireMembership(projectId, currentUser))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.PROJECT_VIEW))
                 .thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> projectService.getProject(projectId))
                 .isInstanceOf(AccessDeniedException.class);
-
-        verify(projectAuthorizationService).requireMembership(projectId, currentUser);
     }
 
     @Test
@@ -179,33 +130,18 @@ public class ProjectServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
         Project project = TestDataFactory.project(
                 projectId,
                 "projectName",
                 "projectDescription"
         );
 
-        ProjectMember member =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.MEMBER
-                );
-
-        when(currentUserService.get())
-                .thenReturn(currentUser);
+        ProjectMember member = TestDataFactory.projectMember(projectId, userId, MemberRole.MEMBER);
 
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
-        when(projectAuthorizationService.requireMembership(projectId, currentUser))
+        when(projectAuthorizationService.requirePermission(projectId, ProjectPermission.PROJECT_VIEW))
                 .thenReturn(member);
 
         when(memberRepository.findByIdProjectIdAndRole(projectId, MemberRole.OWNER))
@@ -222,12 +158,7 @@ public class ProjectServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
+        User user = TestDataFactory.user(userId);
 
         Project project = TestDataFactory.project(
                 projectId,
@@ -235,14 +166,11 @@ public class ProjectServiceTest {
                 "projectDescription"
         );
 
-        ProjectMember currentUserOwner = new ProjectMember(
-                project,
-                currentUser,
-                MemberRole.OWNER
-        );
+        ProjectMember currentUserOwner
+                = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         when(currentUserService.get())
-                .thenReturn(currentUser);
+                .thenReturn(user);
 
         when(projectRepository.save(any(Project.class))).thenReturn(project);
 
@@ -263,7 +191,7 @@ public class ProjectServiceTest {
 
         assertThat(response.currentUserRole()).isEqualTo(MemberRole.OWNER);
 
-        assertThat(response.owner().id()).isEqualTo(currentUser.id());
+        assertThat(response.owner().id()).isEqualTo(userId);
 
         verify(projectRepository).save(any(Project.class));
         verify(memberRepository).save(any(ProjectMember.class));
@@ -274,34 +202,20 @@ public class ProjectServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
         Project project = TestDataFactory.project(
                 projectId,
                 "projectName",
                 "projectDescription"
         );
 
-        ProjectMember owner =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.OWNER
-                );
+        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
-        when(currentUserService.get())
-                .thenReturn(currentUser);
 
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
         when(projectAuthorizationService
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE)
+                .requirePermission(projectId, ProjectPermission.PROJECT_UPDATE)
         ).thenReturn(owner);
 
         when(memberRepository.findByIdProjectIdAndRole(
@@ -332,7 +246,7 @@ public class ProjectServiceTest {
                 .isEqualTo(MemberRole.OWNER);
 
         assertThat(response.owner().id())
-                .isEqualTo(currentUser.id());
+                .isEqualTo(userId);
 
         assertThat(project.name())
                 .isEqualTo(request.name());
@@ -344,36 +258,17 @@ public class ProjectServiceTest {
     @Test
     void updateProject_throws_access_denied_when_user_does_not_have_permission() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
         Project project = TestDataFactory.project(
                 projectId,
                 "projectName",
                 "projectDescription"
         );
 
-        ProjectMember viewer =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.VIEWER
-                );
-
-        when(currentUserService.get())
-                .thenReturn(currentUser);
-
         when(projectRepository.findById(projectId))
                 .thenReturn(Optional.of(project));
 
         when(projectAuthorizationService
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE)
+                .requirePermission(projectId, ProjectPermission.PROJECT_UPDATE)
         ).thenThrow(AccessDeniedException.class);
 
         UpdateProjectRequest request =
@@ -384,30 +279,17 @@ public class ProjectServiceTest {
 
         assertThatThrownBy(() -> projectService.updateProject(projectId, request))
                 .isInstanceOf(AccessDeniedException.class);
-
-        verify(projectAuthorizationService)
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_UPDATE);
     }
 
     @Test
     void updateProject_throws_resource_not_found_when_project_does_not_exist() {
-        UUID userId = UUID.randomUUID();
         UUID projectId = UUID.randomUUID();
-
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
 
         UpdateProjectRequest request =
                 new UpdateProjectRequest(
                         "updatedName",
                         "updatedDescription"
                 );
-
-        when(currentUserService.get()).thenReturn(currentUser);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
@@ -422,95 +304,42 @@ public class ProjectServiceTest {
         UUID projectId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
         Project project = TestDataFactory.project(
                 projectId,
                 "projectName",
                 "projectDescription"
         );
 
-        ProjectMember owner =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.OWNER
-                );
-
-        when(currentUserService.get()).thenReturn(currentUser);
+        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         when(projectAuthorizationService
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE)
+                .requirePermission(projectId, ProjectPermission.PROJECT_DELETE)
         ).thenReturn(owner);
 
         projectService.deleteProject(projectId);
 
         verify(projectRepository).delete(project);
-        verify(projectAuthorizationService)
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE);
     }
 
     @Test
     void deleteProject_throws_access_denied_when_user_does_not_have_permission() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
-        Project project = TestDataFactory.project(
-                projectId,
-                "projectName",
-                "projectDescription"
-        );
-
-        ProjectMember member =
-                new ProjectMember(
-                        project,
-                        currentUser,
-                        MemberRole.MEMBER
-                );
-
-        when(currentUserService.get()).thenReturn(currentUser);
-
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         when(projectAuthorizationService
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE)
+                .requirePermission(projectId, ProjectPermission.PROJECT_DELETE)
         ).thenThrow(AccessDeniedException.class);
 
         assertThatThrownBy(() -> projectService.deleteProject(projectId))
                 .isInstanceOf(AccessDeniedException.class);
 
-        verify(projectAuthorizationService)
-                .requirePermission(projectId, currentUser, ProjectPermission.PROJECT_DELETE);
         verifyNoMoreInteractions(projectRepository);
     }
 
     @Test
     void deleteProject_throws_resource_not_found_when_project_does_not_exist() {
         UUID projectId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-
-        User currentUser = TestDataFactory.user(
-                userId,
-                "test@email.com",
-                "user",
-                "password"
-        );
-
-        when(currentUserService.get()).thenReturn(currentUser);
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 

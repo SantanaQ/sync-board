@@ -9,8 +9,6 @@ import com.backend.common.reordering.PositionCalculator;
 import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -25,17 +23,16 @@ public class CardReorderingService {
     private static final BigDecimal POSITION_PADDING = new BigDecimal("1000");
     private static final int POSITION_SCALE = 10; // numeric scale in db
 
-    private final CurrentUserService currentUserService;
     private final ProjectAuthorizationService projectAuthorizationService;
     private final ReorderingService<Card> reorderingService;
 
     private final CardRepository cardRepository;
 
 
-    public CardReorderingService(CurrentUserService currentUserService,
-                                 ProjectAuthorizationService projectAuthorizationService,
-                                 CardRepository cardRepository) {
-        this.currentUserService = currentUserService;
+    public CardReorderingService(
+            ProjectAuthorizationService projectAuthorizationService,
+            CardRepository cardRepository
+    ) {
         this.projectAuthorizationService = projectAuthorizationService;
         this.cardRepository = cardRepository;
         PositionCalculator posCalculator = new PositionCalculator(
@@ -48,18 +45,14 @@ public class CardReorderingService {
 
 
     @Transactional
-    public CardResponse reorderCard(UUID projectId,
-                                    UUID boardId,
-                                    UUID columnId,
-                                    UUID cardId,
-                                    ReorderCardRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.CARD_UPDATE
-        );
+    public CardResponse reorderCard(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            UUID cardId,
+            ReorderCardRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.CARD_UPDATE);
 
         Card card = requirePresence(projectId, boardId, columnId, cardId);
 

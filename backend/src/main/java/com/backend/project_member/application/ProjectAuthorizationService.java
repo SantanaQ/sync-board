@@ -5,6 +5,7 @@ import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectMemberId;
 import com.backend.project_member.domain.ProjectPermission;
 import com.backend.project_member.infrastructure.ProjectMemberRepository;
+import com.backend.user.application.CurrentUserService;
 import com.backend.user.domain.User;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,14 @@ import java.util.UUID;
 @Service
 public class ProjectAuthorizationService {
 
+    private final CurrentUserService currentUserService;
     private final ProjectMemberRepository memberRepository;
 
-    public ProjectAuthorizationService(ProjectMemberRepository projectMemberRepository) {
+    public ProjectAuthorizationService(
+            CurrentUserService currentUserService,
+            ProjectMemberRepository projectMemberRepository
+    ) {
+        this.currentUserService = currentUserService;
         this.memberRepository = projectMemberRepository;
     }
 
@@ -39,11 +45,12 @@ public class ProjectAuthorizationService {
 
     public ProjectMember requirePermission(
             UUID projectId,
-            User user,
             ProjectPermission permission
     ) {
-        ProjectMember membership =
-                requireMembership(projectId, user);
+
+        User user = currentUserService.get();
+
+        ProjectMember membership = requireMembership(projectId, user);
 
         if (!membership.hasPermission(permission)) {
             throw new AccessDeniedException(

@@ -10,8 +10,6 @@ import com.backend.board_column.infrastructure.BoardColumnRepository;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -22,26 +20,23 @@ import java.util.UUID;
 @Service
 public class BoardColumnService {
 
-    private final CurrentUserService currentUserService;
     private final ProjectAuthorizationService projectAuthorizationService;
 
     private final BoardRepository boardRepository;
     private final BoardColumnRepository boardColumnRepository;
 
-    public BoardColumnService(CurrentUserService currentUserService,
-                              ProjectAuthorizationService projectAuthorizationService,
-                              BoardRepository boardRepository,
-                              BoardColumnRepository boardColumnRepository) {
-        this.currentUserService = currentUserService;
+    public BoardColumnService(
+            ProjectAuthorizationService projectAuthorizationService,
+            BoardRepository boardRepository,
+            BoardColumnRepository boardColumnRepository
+    ) {
         this.projectAuthorizationService = projectAuthorizationService;
         this.boardRepository = boardRepository;
         this.boardColumnRepository = boardColumnRepository;
     }
 
     public List<BoardColumnResponse> getColumns(UUID projectId, UUID boardId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requireMembership(projectId, currentUser);
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_VIEW);
 
         return boardColumnRepository
                 .findAllInHierarchy(boardId, projectId).stream()
@@ -53,16 +48,12 @@ public class BoardColumnService {
     }
 
     @Transactional
-    public BoardColumnResponse createColumn(UUID projectId,
-                                            UUID boardId,
-                                            CreateBoardColumnRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.COLUMN_CREATE
-        );
+    public BoardColumnResponse createColumn(
+            UUID projectId,
+            UUID boardId,
+            CreateBoardColumnRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_CREATE);
 
         Board board = boardRepository
                 .findByIdAndProjectId(boardId, projectId)
@@ -81,17 +72,13 @@ public class BoardColumnService {
     }
 
     @Transactional
-    public BoardColumnResponse updateColumn(UUID projectId,
-                                            UUID boardId,
-                                            UUID columnId,
-                                            UpdateBoardColumnRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.COLUMN_UPDATE
-        );
+    public BoardColumnResponse updateColumn(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            UpdateBoardColumnRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_UPDATE);
 
         BoardColumn column = requirePresence(projectId, boardId, columnId);
         column.setName(request.name());
@@ -101,23 +88,23 @@ public class BoardColumnService {
     }
 
     @Transactional
-    public void deleteColumn(UUID projectId,
-                             UUID boardId,
-                             UUID columnId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.COLUMN_DELETE
-        );
+    public void deleteColumn(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_DELETE);
 
         BoardColumn column = requirePresence(projectId, boardId, columnId);
 
         boardColumnRepository.delete(column);
     }
 
-    private BoardColumn requirePresence(UUID projectId, UUID boardId, UUID columnId) {
+    private BoardColumn requirePresence(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId
+    ) {
         return boardColumnRepository
                 .findInHierarchy(projectId, boardId, columnId)
                 .orElseThrow(() ->

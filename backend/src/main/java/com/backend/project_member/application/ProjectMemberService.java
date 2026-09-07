@@ -14,7 +14,6 @@ import com.backend.project_member.domain.ProjectMemberId;
 import com.backend.project_member.domain.ProjectPermission;
 import com.backend.project_member.infrastructure.ProjectMemberRepository;
 import com.backend.user.api.UserResponse;
-import com.backend.user.application.CurrentUserService;
 import com.backend.user.domain.User;
 import com.backend.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,26 +22,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static com.backend.project_member.domain.ProjectPermission.MEMBER_REMOVE;
-import static com.backend.project_member.domain.ProjectPermission.MEMBER_UPDATE;
+import static com.backend.project_member.domain.ProjectPermission.*;
 
 @Service
 public class ProjectMemberService {
 
-    private final CurrentUserService currentUserService;
     private final ProjectAuthorizationService projectAuthorizationService;
 
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
 
-    public ProjectMemberService(CurrentUserService currentUserService,
-                                ProjectAuthorizationService projectAuthorizationService,
-                                ProjectMemberRepository projectMemberRepository,
-                                ProjectRepository projectRepository,
-                                UserRepository userRepository
-                                ) {
-        this.currentUserService = currentUserService;
+    public ProjectMemberService(
+            ProjectAuthorizationService projectAuthorizationService,
+            ProjectMemberRepository projectMemberRepository,
+            ProjectRepository projectRepository,
+            UserRepository userRepository
+    ) {
         this.projectAuthorizationService = projectAuthorizationService;
         this.projectRepository = projectRepository;
         this.projectMemberRepository = projectMemberRepository;
@@ -50,9 +46,7 @@ public class ProjectMemberService {
     }
 
     public List<ProjectMemberResponse> getMembers(UUID projectId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requireMembership(projectId, currentUser);
+        projectAuthorizationService.requirePermission(projectId, MEMBER_VIEW);
 
         return projectMemberRepository.findAllByProjectId(projectId)
                 .stream()
@@ -66,9 +60,7 @@ public class ProjectMemberService {
     }
 
     public ProjectMemberResponse getMember(UUID projectId, UUID userId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requireMembership(projectId, currentUser);
+        projectAuthorizationService.requirePermission(projectId, MEMBER_VIEW);
 
         ProjectMember pm = requirePresence(projectId, userId);
 
@@ -77,12 +69,7 @@ public class ProjectMemberService {
 
     @Transactional
     public ProjectMemberResponse addMember(UUID projectId, AddMemberRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.MEMBER_ADD);
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.MEMBER_ADD);
 
         Project project = projectRepository
                 .findById(projectId)
@@ -123,13 +110,7 @@ public class ProjectMemberService {
 
     @Transactional
     public void removeMember(UUID projectId, UUID userId) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                MEMBER_REMOVE
-        );
+        projectAuthorizationService.requirePermission(projectId, MEMBER_REMOVE);
 
         ProjectMember toDelete = requirePresence(projectId, userId);
 
@@ -146,13 +127,7 @@ public class ProjectMemberService {
     public ProjectMemberResponse updateMember(UUID projectId,
                                               UUID userId,
                                               UpdateMemberRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                MEMBER_UPDATE
-        );
+        projectAuthorizationService.requirePermission(projectId, MEMBER_UPDATE);
 
         ProjectMember toUpdate = requirePresence(projectId, userId);
 

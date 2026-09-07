@@ -110,16 +110,4 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    public void addMember(User user, MemberRole role) {
-        ProjectMember member = new ProjectMember(this, user, role);
-        members.add(member);
-    }
-
-    public void removeMember(ProjectMember member) {
-        members.remove(member);
-    }
-
-
-
-
 }

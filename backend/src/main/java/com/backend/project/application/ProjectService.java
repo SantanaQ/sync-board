@@ -30,11 +30,12 @@ public class ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectAuthorizationService projectAuthorizationService;
 
-    public ProjectService(ProjectRepository projectRepository,
-                          CurrentUserService currentUserService,
-                          ProjectMemberRepository projectMemberRepository,
-                          ProjectAuthorizationService projectAuthorizationService
-                          ) {
+    public ProjectService(
+            ProjectRepository projectRepository,
+            CurrentUserService currentUserService,
+            ProjectMemberRepository projectMemberRepository,
+            ProjectAuthorizationService projectAuthorizationService
+    ) {
         this.projectRepository = projectRepository;
         this.currentUserService = currentUserService;
         this.projectMemberRepository = projectMemberRepository;
@@ -43,12 +44,10 @@ public class ProjectService {
     }
 
     public ProjectResponse getProject(UUID id) {
-        User currentUser = currentUserService.get();
+        ProjectMember currentUserMember
+                = projectAuthorizationService.requirePermission(id, ProjectPermission.PROJECT_VIEW);
 
         Project project = requirePresence(id);
-
-        ProjectMember currentUserMember = projectAuthorizationService
-                .requireMembership(id, currentUser);
 
         return toResponse(project, currentUserMember);
     }
@@ -94,27 +93,19 @@ public class ProjectService {
 
     @Transactional
     public void deleteProject(UUID id) {
-        User currentUser = currentUserService.get();
+        projectAuthorizationService.requirePermission(id, ProjectPermission.PROJECT_DELETE);
 
         Project project = requirePresence(id);
-
-        projectAuthorizationService.requirePermission(
-                id,
-                currentUser,
-                ProjectPermission.PROJECT_DELETE
-        );
 
         projectRepository.delete(project);
     }
 
+    @Transactional
     public ProjectResponse updateProject(UUID id, UpdateProjectRequest request) {
-        User currentUser = currentUserService.get();
-
         Project project = requirePresence(id);
 
         ProjectMember membership = projectAuthorizationService.requirePermission(
                 id,
-                currentUser,
                 ProjectPermission.PROJECT_UPDATE
         );
 

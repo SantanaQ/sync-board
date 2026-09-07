@@ -4,14 +4,11 @@ import com.backend.board_column.api.BoardColumnResponse;
 import com.backend.board_column.api.ReorderBoardColumnRequest;
 import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
-import com.backend.common.exception.BusinessRuleViolationException;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.common.reordering.PositionCalculator;
 import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,17 +23,16 @@ public class ColumnReorderingService {
     private static final BigDecimal POSITION_PADDING = new BigDecimal("1000");
     private static final int POSITION_SCALE = 10; // numeric scale in db
 
-    private final CurrentUserService currentUserService;
     private final ProjectAuthorizationService projectAuthorizationService;
     private final ReorderingService<BoardColumn> reorderingService;
 
     private final BoardColumnRepository boardColumnRepository;
 
-    public ColumnReorderingService(CurrentUserService currentUserService,
-                                   ProjectAuthorizationService projectAuthorizationService,
-                                   BoardColumnRepository boardColumnRepository) {
+    public ColumnReorderingService(
+            ProjectAuthorizationService projectAuthorizationService,
+            BoardColumnRepository boardColumnRepository
+    ) {
         this.boardColumnRepository = boardColumnRepository;
-        this.currentUserService = currentUserService;
         this.projectAuthorizationService = projectAuthorizationService;
         PositionCalculator posCalculator = new PositionCalculator(
                 MIN_POSITION_GAP,
@@ -47,17 +43,13 @@ public class ColumnReorderingService {
     }
 
     @Transactional
-    public BoardColumnResponse reorderColumn(UUID projectId,
-                                             UUID boardId,
-                                             UUID columnId,
-                                             ReorderBoardColumnRequest request) {
-        User currentUser = currentUserService.get();
-
-        projectAuthorizationService.requirePermission(
-                projectId,
-                currentUser,
-                ProjectPermission.COLUMN_UPDATE
-        );
+    public BoardColumnResponse reorderColumn(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            ReorderBoardColumnRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_UPDATE);
 
         BoardColumn column = requirePresence(projectId, boardId, columnId);
 

@@ -34,8 +34,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ColumnReorderingServiceTest {
 
-    @Mock
-    private CurrentUserService currentUserService;
+    //@Mock
+    //private CurrentUserService currentUserService;
 
     @Mock
     private ProjectAuthorizationService projectAuthorizationService;
@@ -48,19 +48,12 @@ public class ColumnReorderingServiceTest {
 
     @Test
     void reorderColumn_throws_access_denied_if_user_does_not_have_permission() {
-        UUID userId = UUID.randomUUID();
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenThrow(AccessDeniedException.class);
 
@@ -82,16 +75,10 @@ public class ColumnReorderingServiceTest {
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -118,8 +105,6 @@ public class ColumnReorderingServiceTest {
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -131,12 +116,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -163,8 +144,6 @@ public class ColumnReorderingServiceTest {
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -183,12 +162,9 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -217,8 +193,6 @@ public class ColumnReorderingServiceTest {
 
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -237,13 +211,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(2000)
         );
 
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -269,8 +238,6 @@ public class ColumnReorderingServiceTest {
 
         UUID beforeId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(beforeId, projectId, "board");
@@ -289,13 +256,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -321,8 +283,6 @@ public class ColumnReorderingServiceTest {
 
         UUID beforeId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -341,13 +301,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -374,8 +329,6 @@ public class ColumnReorderingServiceTest {
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -401,12 +354,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(2000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -433,8 +382,6 @@ public class ColumnReorderingServiceTest {
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -446,12 +393,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(3000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -476,8 +419,6 @@ public class ColumnReorderingServiceTest {
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -489,12 +430,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(3000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -522,8 +459,6 @@ public class ColumnReorderingServiceTest {
 
         UUID beforeId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -542,12 +477,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -575,8 +506,6 @@ public class ColumnReorderingServiceTest {
 
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -595,12 +524,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(2000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -629,8 +554,6 @@ public class ColumnReorderingServiceTest {
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -656,12 +579,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(2000)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
@@ -692,8 +611,6 @@ public class ColumnReorderingServiceTest {
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        User user = TestDataFactory.user(userId);
-
         ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
 
         Board board = TestDataFactory.board(boardId, projectId, "board");
@@ -719,12 +636,8 @@ public class ColumnReorderingServiceTest {
                 BigDecimal.valueOf(1000.0002)
         );
 
-        when(currentUserService.get())
-                .thenReturn(user);
-
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                user,
                 ProjectPermission.COLUMN_UPDATE)
         ).thenReturn(owner);
 
