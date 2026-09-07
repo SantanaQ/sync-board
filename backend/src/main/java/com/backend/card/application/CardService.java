@@ -2,10 +2,7 @@ package com.backend.card.application;
 
 import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
-import com.backend.card.api.CardListResponse;
-import com.backend.card.api.CardResponse;
-import com.backend.card.api.CreateCardRequest;
-import com.backend.card.api.UpdateCardRequest;
+import com.backend.card.api.*;
 import com.backend.card.domain.Card;
 import com.backend.card.infrastructure.CardRepository;
 import com.backend.common.exception.ResourceNotFoundException;
@@ -87,9 +84,9 @@ public class CardService {
 
         Card card = new Card(column, request.title(), request.description(), position);
 
-        Card saved = cardRepository.save(card);
+        cardRepository.save(card);
 
-        return toResponse(saved);
+        return toResponse(card);
     }
 
     public CardResponse updateCard(
@@ -107,8 +104,8 @@ public class CardService {
         card.setVersion(card.version() + 1);
         card.setUpdatedAt(Instant.now());
 
-        Card saved = cardRepository.save(card);
-        return toResponse(saved);
+        cardRepository.save(card);
+        return toResponse(card);
     }
 
     public void deleteCard(
@@ -123,6 +120,35 @@ public class CardService {
 
         cardRepository.delete(card);
     }
+
+    public CardResponse moveCard(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            UUID cardId,
+            MoveCardRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.CARD_UPDATE);
+
+        Card card = requirePresence(projectId, boardId, columnId, cardId);
+
+        BoardColumn newColumn = boardColumnRepository
+                .findInHierarchy(
+                        projectId,
+                        boardId,
+                        request.newColumnId()
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Column with id " + request.newColumnId() + " not found."
+                        )
+                );
+
+        card.setColumn(newColumn);
+
+        return toResponse(card);
+    }
+
 
     private Card requirePresence(
             UUID projectId,
@@ -143,6 +169,7 @@ public class CardService {
                 card.column().id(),
                 card.title(),
                 card.description(),
+                card.position(),
                 card.createdAt(),
                 card.updatedAt()
         );

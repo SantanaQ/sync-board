@@ -103,6 +103,7 @@ public class CardReorderingService {
                 card.column().id(),
                 card.title(),
                 card.description(),
+                card.position(),
                 card.createdAt(),
                 card.updatedAt()
         );

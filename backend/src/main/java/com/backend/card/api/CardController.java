@@ -86,9 +86,15 @@ public class CardController {
         return cardReorderingService.reorderCard(projectId, boardId, columnId, cardId, request);
     }
 
-    @PostMapping("/{cardId}/transfer")
-    public CardResponse switchColumn() {
-        return null;
+    @PostMapping("/{cardId}/move")
+    public CardResponse moveCard(
+            @PathVariable("projectId") UUID projectId,
+            @PathVariable("boardId") UUID boardId,
+            @PathVariable("columnId") UUID columnId,
+            @PathVariable("cardId") UUID cardId,
+            @Valid @RequestBody MoveCardRequest request
+    ) {
+        return cardService.moveCard(projectId, boardId, columnId, cardId, request);
     }
 
 

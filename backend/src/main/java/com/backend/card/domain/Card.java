@@ -113,4 +113,8 @@ public class Card implements Reorderable {
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public void setColumn(BoardColumn column) {
+        this.column = column;
+    }
 }

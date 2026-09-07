@@ -25,7 +25,7 @@ public class ProjectAuthorizationService {
         this.memberRepository = projectMemberRepository;
     }
 
-    public ProjectMember requireMembership(
+    private ProjectMember requireMembership(
             UUID projectId,
             User user
     ) {

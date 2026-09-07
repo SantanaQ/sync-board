@@ -4,6 +4,10 @@ import com.backend.board.domain.Board;
 import com.backend.board_column.api.CreateBoardColumnRequest;
 import com.backend.board_column.api.UpdateBoardColumnRequest;
 import com.backend.board_column.domain.BoardColumn;
+import com.backend.card.api.CreateCardRequest;
+import com.backend.card.api.MoveCardRequest;
+import com.backend.card.api.UpdateCardRequest;
+import com.backend.card.domain.Card;
 import com.backend.project.domain.Project;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
@@ -80,12 +84,46 @@ public class TestDataFactory {
         return column;
     }
 
+    public static BoardColumn column(UUID id, UUID boardId, UUID projectId) {
+        Board board = board(boardId, projectId, "board");
+        return column(id, board, "column", BigDecimal.ZERO);
+    }
+
     public static CreateBoardColumnRequest createBoardColumnRequest() {
         return new CreateBoardColumnRequest("board");
     }
 
     public static UpdateBoardColumnRequest updateBoardColumnRequest() {
         return new UpdateBoardColumnRequest("board");
+    }
+
+    public static Card card(UUID cardId, UUID columnId) {
+        BoardColumn column = column(
+                columnId,
+                null,
+                "col",
+                BigDecimal.ZERO
+        );
+        Card card = new Card(
+                column,
+                "card",
+                "description",
+                BigDecimal.valueOf(1000)
+        );
+        ReflectionTestUtils.setField(card, "id", cardId);
+        return card;
+    }
+
+    public static CreateCardRequest createCardRequest() {
+        return new CreateCardRequest("cardTitle", "cardDescription");
+    }
+
+    public static UpdateCardRequest updateCardRequest() {
+        return new UpdateCardRequest("updatedCard", "updatedDescription", 1);
+    }
+
+    public static MoveCardRequest moveCardRequest(UUID newColumnId) {
+        return new MoveCardRequest(newColumnId);
     }
 
 
