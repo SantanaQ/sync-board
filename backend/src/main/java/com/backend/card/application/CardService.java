@@ -8,6 +8,7 @@ import com.backend.card.infrastructure.CardRepository;
 import com.backend.common.exception.ResourceNotFoundException;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -66,6 +67,7 @@ public class CardService {
                 ).toList();
     }
 
+    @Transactional
     public CardResponse createCard(
             UUID projectId,
             UUID boardId,
@@ -89,6 +91,7 @@ public class CardService {
         return toResponse(card);
     }
 
+    @Transactional
     public CardResponse updateCard(
             UUID projectId,
             UUID boardId,
@@ -108,6 +111,7 @@ public class CardService {
         return toResponse(card);
     }
 
+    @Transactional
     public void deleteCard(
             UUID projectId,
             UUID boardId,
@@ -121,6 +125,7 @@ public class CardService {
         cardRepository.delete(card);
     }
 
+    @Transactional
     public CardResponse moveCard(
             UUID projectId,
             UUID boardId,
