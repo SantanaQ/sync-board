@@ -66,9 +66,9 @@ public class BoardColumnService {
 
         BoardColumn column = new BoardColumn(board, request.name(), maxPos);
 
-        BoardColumn saved = boardColumnRepository.save(column);
+        boardColumnRepository.save(column);
 
-        return toResponse(saved);
+        return toResponse(column);
     }
 
     @Transactional
@@ -83,8 +83,8 @@ public class BoardColumnService {
         BoardColumn column = requirePresence(projectId, boardId, columnId);
         column.setName(request.name());
 
-        BoardColumn saved = boardColumnRepository.save(column);
-        return toResponse(saved);
+        boardColumnRepository.save(column);
+        return toResponse(column);
     }
 
     @Transactional

@@ -96,12 +96,12 @@ public class BoardService {
                 project
         );
 
-        Board saved = boardRepository.save(board);
+        boardRepository.save(board);
 
         return new BoardResponse(
-                saved.name(),
-                saved.createdAt(),
-                saved.updatedAt()
+                board.name(),
+                board.createdAt(),
+                board.updatedAt()
         );
     }
 

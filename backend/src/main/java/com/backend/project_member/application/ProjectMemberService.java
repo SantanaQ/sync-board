@@ -103,9 +103,9 @@ public class ProjectMemberService {
 
         ProjectMember pm = new ProjectMember(project, user, request.role());
 
-        ProjectMember saved = projectMemberRepository.save(pm);
+        projectMemberRepository.save(pm);
 
-        return toResponse(saved);
+        return toResponse(pm);
     }
 
     @Transactional

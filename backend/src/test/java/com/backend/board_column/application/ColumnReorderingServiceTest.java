@@ -13,8 +13,6 @@ import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.MemberRole;
 import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectPermission;
-import com.backend.user.application.CurrentUserService;
-import com.backend.user.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,9 +31,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ColumnReorderingServiceTest {
-
-    //@Mock
-    //private CurrentUserService currentUserService;
 
     @Mock
     private ProjectAuthorizationService projectAuthorizationService;

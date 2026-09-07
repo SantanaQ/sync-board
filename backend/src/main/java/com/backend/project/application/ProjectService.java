@@ -58,10 +58,10 @@ public class ProjectService {
 
         Project project = new Project(request.name(), request.description());
 
-        Project saved = projectRepository.save(project);
+        projectRepository.save(project);
 
         ProjectMember owner = new ProjectMember(
-                saved,
+                project,
                 currentUser,
                 MemberRole.OWNER
         );
@@ -69,11 +69,11 @@ public class ProjectService {
         projectMemberRepository.save(owner);
 
         return new ProjectResponse(
-                saved.id(),
-                saved.name(),
-                saved.description(),
-                saved.createdAt(),
-                saved.updatedAt(),
+                project.id(),
+                project.name(),
+                project.description(),
+                project.createdAt(),
+                project.updatedAt(),
                 new UserResponse(
                         currentUser.id(),
                         currentUser.displayName(),
