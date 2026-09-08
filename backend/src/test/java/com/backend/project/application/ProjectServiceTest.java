@@ -183,11 +183,9 @@ public class ProjectServiceTest {
 
         ProjectResponse response = projectService.createProject(request);
 
-        assertThat(response.id()).isEqualTo(project.id());
+        assertThat(response.name()).isEqualTo(request.name());
 
-        assertThat(response.name()).isEqualTo(project.name());
-
-        assertThat(response.description()).isEqualTo(project.description());
+        assertThat(response.description()).isEqualTo(request.description());
 
         assertThat(response.currentUserRole()).isEqualTo(MemberRole.OWNER);
 

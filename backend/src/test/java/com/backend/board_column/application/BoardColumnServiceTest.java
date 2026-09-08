@@ -166,10 +166,9 @@ public class BoardColumnServiceTest {
         when(boardColumnRepository.save(any(BoardColumn.class))).thenReturn(boardColumn);
 
         CreateBoardColumnRequest request = TestDataFactory.createBoardColumnRequest();
-
         BoardColumnResponse response = boardColumnService.createColumn(projectId, boardId, request);
 
-        assertThat(response.name()).isEqualTo(boardColumn.name());
+        assertThat(response.name()).isEqualTo(request.name());
 
         verify(boardColumnRepository).save(any(BoardColumn.class));
 

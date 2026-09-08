@@ -90,11 +90,11 @@ public class TestDataFactory {
     }
 
     public static CreateBoardColumnRequest createBoardColumnRequest() {
-        return new CreateBoardColumnRequest("board");
+        return new CreateBoardColumnRequest("column");
     }
 
     public static UpdateBoardColumnRequest updateBoardColumnRequest() {
-        return new UpdateBoardColumnRequest("board");
+        return new UpdateBoardColumnRequest("updatedColumn");
     }
 
     public static Card card(UUID cardId, UUID columnId) {
@@ -111,6 +111,12 @@ public class TestDataFactory {
                 BigDecimal.valueOf(1000)
         );
         ReflectionTestUtils.setField(card, "id", cardId);
+        return card;
+    }
+
+    public static Card card(UUID cardId, UUID columnID, BigDecimal position) {
+        Card card = card(cardId, columnID);
+        card.setPosition(position);
         return card;
     }
 

@@ -5,11 +5,12 @@ import com.backend.board_column.api.ReorderBoardColumnRequest;
 import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
 import com.backend.common.exception.ResourceNotFoundException;
-import com.backend.common.reordering.PositionCalculator;
+import com.backend.common.reordering.RebalancedNeighbors;
 import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,10 +20,6 @@ import java.util.UUID;
 @Service
 public class ColumnReorderingService {
 
-    private static final BigDecimal MIN_POSITION_GAP = new BigDecimal("0.0001");
-    private static final BigDecimal POSITION_PADDING = new BigDecimal("1000");
-    private static final int POSITION_SCALE = 10; // numeric scale in db
-
     private final ProjectAuthorizationService projectAuthorizationService;
     private final ReorderingService<BoardColumn> reorderingService;
 
@@ -30,16 +27,12 @@ public class ColumnReorderingService {
 
     public ColumnReorderingService(
             ProjectAuthorizationService projectAuthorizationService,
-            BoardColumnRepository boardColumnRepository
+            BoardColumnRepository boardColumnRepository,
+            @Qualifier("columnReordering") ReorderingService<BoardColumn> reorderingService
     ) {
         this.boardColumnRepository = boardColumnRepository;
         this.projectAuthorizationService = projectAuthorizationService;
-        PositionCalculator posCalculator = new PositionCalculator(
-                MIN_POSITION_GAP,
-                POSITION_PADDING,
-                POSITION_SCALE
-        );
-        this.reorderingService = new ReorderingService<>(posCalculator);
+        this.reorderingService = reorderingService;
     }
 
     @Transactional
@@ -70,21 +63,38 @@ public class ColumnReorderingService {
                 before,
                 after,
                 colCount,
-                () -> rebalance(projectId, boardId)
+                () -> rebalance(projectId, boardId, before, after)
         );
 
         return toResponse(column);
     }
 
-    private void rebalance(UUID projectId, UUID boardId) {
+    private RebalancedNeighbors<BoardColumn> rebalance(
+            UUID projectId,
+            UUID boardId,
+            BoardColumn before,
+            BoardColumn after
+    ) {
         List<BoardColumn> cols = boardColumnRepository
                 .findAllInHierarchy(boardId, projectId);
 
-        int pos = POSITION_PADDING.intValue();
+
+        int padding = reorderingService.padding();
+        int pos = padding;
         for(BoardColumn col : cols) {
             col.setPosition(BigDecimal.valueOf(pos));
-            pos += POSITION_PADDING.intValue();
+            pos += padding;
+
+            if(col.id().equals(before.id())) {
+                before = col;
+            }
+
+            if(col.id().equals(after.id())) {
+                after = col;
+            }
         }
+        return new RebalancedNeighbors<>(before, after);
+
     }
 
     private BoardColumn requirePresence(UUID projectId, UUID boardId, UUID columnId) {

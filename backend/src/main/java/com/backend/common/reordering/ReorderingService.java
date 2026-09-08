@@ -2,6 +2,8 @@ package com.backend.common.reordering;
 
 import com.backend.common.exception.BusinessRuleViolationException;
 
+import java.util.function.Supplier;
+
 public class ReorderingService<T extends Reorderable> {
 
     private final PositionCalculator positionCalculator;
@@ -15,7 +17,7 @@ public class ReorderingService<T extends Reorderable> {
             T before,
             T after,
             long count,
-            Runnable rebalance
+            Supplier<RebalancedNeighbors<T>> rebalance
     ) {
         if (before == null && after == null) {
             if (count > 1) {
@@ -46,7 +48,10 @@ public class ReorderingService<T extends Reorderable> {
                 before.position(),
                 after.position()
         )) {
-            rebalance.run();
+            // update entities to ensure rebalanced position is visible
+            RebalancedNeighbors<T> neighbors = rebalance.get();
+            before = neighbors.before();
+            after = neighbors.after();
         }
 
         entity.setPosition(
@@ -86,6 +91,10 @@ public class ReorderingService<T extends Reorderable> {
                     "Predecessor must be positioned before successor."
             );
         }
+    }
+
+    public int padding() {
+        return positionCalculator.paddingValue();
     }
 
 }

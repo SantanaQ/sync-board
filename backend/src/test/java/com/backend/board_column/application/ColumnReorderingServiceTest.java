@@ -2,16 +2,13 @@ package com.backend.board_column.application;
 
 import com.backend.TestDataFactory;
 import com.backend.board.domain.Board;
-import com.backend.board_column.api.BoardColumnResponse;
 import com.backend.board_column.api.ReorderBoardColumnRequest;
 import com.backend.board_column.domain.BoardColumn;
 import com.backend.board_column.infrastructure.BoardColumnRepository;
 import com.backend.common.exception.AccessDeniedException;
-import com.backend.common.exception.BusinessRuleViolationException;
 import com.backend.common.exception.ResourceNotFoundException;
+import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
-import com.backend.project_member.domain.MemberRole;
-import com.backend.project_member.domain.ProjectMember;
 import com.backend.project_member.domain.ProjectPermission;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,23 +17,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ColumnReorderingServiceTest {
+class ColumnReorderingServiceTest {
 
     @Mock
     private ProjectAuthorizationService projectAuthorizationService;
 
     @Mock
     private BoardColumnRepository boardColumnRepository;
+
+    @Mock
+    private ReorderingService<BoardColumn> reorderingService;
 
     @InjectMocks
     private ColumnReorderingService columnReorderingService;
@@ -49,612 +46,128 @@ public class ColumnReorderingServiceTest {
 
         when(projectAuthorizationService.requirePermission(
                 projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenThrow(AccessDeniedException.class);
+                ProjectPermission.COLUMN_UPDATE
+        )).thenThrow(AccessDeniedException.class);
 
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
+        ReorderBoardColumnRequest request =
+                new ReorderBoardColumnRequest(null, null);
 
         assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(AccessDeniedException.class);
+                columnReorderingService.reorderColumn(
+                        projectId,
+                        boardId,
+                        columnId,
+                        request
+                )
+        )
+                .isInstanceOf(AccessDeniedException.class);
 
         verifyNoInteractions(boardColumnRepository);
+        verifyNoInteractions(reorderingService);
     }
 
     @Test
     void reorderColumn_throws_resource_not_found_if_column_does_not_exist() {
-        UUID userId = UUID.randomUUID();
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
 
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        when(projectAuthorizationService.requirePermission(
+        when(boardColumnRepository.findInHierarchy(
                 projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
+                boardId,
+                columnId
+        )).thenReturn(Optional.empty());
 
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.empty());
-
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
+        ReorderBoardColumnRequest request =
+                new ReorderBoardColumnRequest(null, null);
 
         assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(ResourceNotFoundException.class);
+                columnReorderingService.reorderColumn(
+                        projectId,
+                        boardId,
+                        columnId,
+                        request
+                )
+        )
+                .isInstanceOf(ResourceNotFoundException.class);
 
+        verifyNoInteractions(reorderingService);
     }
 
     @Test
-    void reorderColumn_throws_resource_not_found_if_before_column_does_not_exist() {
-        UUID userId = UUID.randomUUID();
+    void reorderColumn_delegates_reordering_to_reordering_service() {
         UUID projectId = UUID.randomUUID();
         UUID boardId = UUID.randomUUID();
         UUID columnId = UUID.randomUUID();
-
         UUID beforeId = UUID.randomUUID();
         UUID afterId = UUID.randomUUID();
 
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
+        Board board = TestDataFactory.board(
+                boardId,
+                projectId,
+                "board"
+        );
 
         BoardColumn column = TestDataFactory.column(
                 columnId,
                 board,
-                "col1",
+                "column",
+                BigDecimal.valueOf(3000)
+        );
+
+        BoardColumn before = TestDataFactory.column(
+                beforeId,
+                board,
+                "before",
                 BigDecimal.valueOf(1000)
         );
 
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.empty());
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    void reorderColumn_throws_resource_not_found_if_after_column_does_not_exist() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
+        BoardColumn after = TestDataFactory.column(
+                afterId,
                 board,
-                "col",
+                "after",
                 BigDecimal.valueOf(2000)
         );
 
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000)
-        );
+        when(boardColumnRepository.findInHierarchy(
+                projectId, boardId, columnId
+        )).thenReturn(Optional.of(column));
 
+        when(boardColumnRepository.findInHierarchy(
+                projectId, boardId, beforeId
+        )).thenReturn(Optional.of(before));
 
-        when(projectAuthorizationService.requirePermission(
+        when(boardColumnRepository.findInHierarchy(
+                projectId, boardId, afterId
+        )).thenReturn(Optional.of(after));
+
+        when(boardColumnRepository.countInHierarchy(
+                boardId,
+                projectId
+        )).thenReturn(3);
+
+        ReorderBoardColumnRequest request =
+                new ReorderBoardColumnRequest(beforeId, afterId);
+
+        columnReorderingService.reorderColumn(
                 projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.empty());
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
-    void reorderColumn_throws_business_rule_violation_if_before_column_equals_reordered_column() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
+                boardId,
                 columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
+                request
         );
 
-        BoardColumn afterColumn = TestDataFactory.column(
-                afterId,
-                board,
-                "colAfter",
-                BigDecimal.valueOf(2000)
+        verify(reorderingService).validateNeighbors(
+                column,
+                before,
+                after
         );
 
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.of(afterColumn));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(columnId, afterId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(BusinessRuleViolationException.class);
+        verify(reorderingService).reorder(
+                eq(column),
+                eq(before),
+                eq(after),
+                eq(3L),
+                any()
+        );
     }
-
-    @Test
-    void reorderColumn_throws_business_rule_violation_if_after_column_equals_reordered_column() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(beforeId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, columnId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void reorderColumn_throws_business_rule_violation_if_before_column_equals_after_column() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, beforeId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void reorderColumn_throws_business_rule_violation_if_before_column_is_not_positioned_before_after_column() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(4000)
-        );
-
-        BoardColumn afterColumn = TestDataFactory.column(
-                afterId,
-                board,
-                "colAfter",
-                BigDecimal.valueOf(2000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.of(afterColumn));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void reorderColumn_throws_business_rule_violation_if_board_contains_multiple_columns_and_no_before_or_after_col_provided() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.countInHierarchy(boardId, projectId))
-                .thenReturn(2);
-
-        ReorderBoardColumnRequest request
-                = new ReorderBoardColumnRequest(null, null);
-
-        assertThatThrownBy(() ->
-                columnReorderingService.reorderColumn(projectId, boardId, columnId, request)
-        ).isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void reorderColumn_sets_first_position_if_board_is_empty() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.countInHierarchy(boardId, projectId))
-                .thenReturn(0);
-
-        ReorderBoardColumnRequest request
-                = new ReorderBoardColumnRequest(null, null);
-
-        BoardColumnResponse response
-                = columnReorderingService.reorderColumn(projectId, boardId, columnId, request);
-
-        assertThat(response.position().compareTo(BigDecimal.valueOf(1000)) == 0);
-    }
-
-    @Test
-    void reorderColumn_sets_last_position_if_only_before_column_is_provided() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(0)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        ReorderBoardColumnRequest request
-                = new ReorderBoardColumnRequest(beforeId, null);
-
-        BoardColumnResponse response
-                = columnReorderingService.reorderColumn(projectId, boardId, columnId, request);
-
-        assertThat(response.position().compareTo(BigDecimal.valueOf(2000)) == 0);
-    }
-
-    @Test
-    void reorderColumn_sets_first_position_if_only_after_column_is_provided() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn afterColumn = TestDataFactory.column(
-                afterId,
-                board,
-                "colAfter",
-                BigDecimal.valueOf(2000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.of(afterColumn));
-
-        ReorderBoardColumnRequest request
-                = new ReorderBoardColumnRequest(null, afterId);
-
-        BoardColumnResponse response
-                = columnReorderingService.reorderColumn(projectId, boardId, columnId, request);
-
-        assertThat(response.position().compareTo(BigDecimal.valueOf(1000)) == 0);
-    }
-
-    @Test
-    void reorderColumn_sets_position_between_before_and_after_column_if_both_provided() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000)
-        );
-
-        BoardColumn afterColumn = TestDataFactory.column(
-                afterId,
-                board,
-                "colAfter",
-                BigDecimal.valueOf(2000)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.of(afterColumn));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
-
-        BoardColumnResponse response
-                = columnReorderingService.reorderColumn(projectId, boardId, columnId, request);
-
-        assertThat(response.position().compareTo(BigDecimal.valueOf(1500)) == 0);
-    }
-
-    @Test
-    void reorderColumn_rebalances_board_if_position_gap_is_too_small() {
-        UUID userId = UUID.randomUUID();
-        UUID projectId = UUID.randomUUID();
-        UUID boardId = UUID.randomUUID();
-        UUID columnId = UUID.randomUUID();
-
-        UUID beforeId = UUID.randomUUID();
-        UUID afterId = UUID.randomUUID();
-
-        ProjectMember owner = TestDataFactory.projectMember(projectId, userId, MemberRole.OWNER);
-
-        Board board = TestDataFactory.board(boardId, projectId, "board");
-
-        BoardColumn column = TestDataFactory.column(
-                columnId,
-                board,
-                "col",
-                BigDecimal.valueOf(3000)
-        );
-
-        BoardColumn beforeColumn = TestDataFactory.column(
-                beforeId,
-                board,
-                "colBefore",
-                BigDecimal.valueOf(1000.0001)
-        );
-
-        BoardColumn afterColumn = TestDataFactory.column(
-                afterId,
-                board,
-                "colAfter",
-                BigDecimal.valueOf(1000.0002)
-        );
-
-        when(projectAuthorizationService.requirePermission(
-                projectId,
-                ProjectPermission.COLUMN_UPDATE)
-        ).thenReturn(owner);
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, columnId))
-                .thenReturn(Optional.of(column));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, beforeId))
-                .thenReturn(Optional.of(beforeColumn));
-
-        when(boardColumnRepository.findInHierarchy(projectId, boardId, afterId))
-                .thenReturn(Optional.of(afterColumn));
-
-        when(boardColumnRepository.findAllInHierarchy(boardId, projectId))
-                .thenReturn(List.of(beforeColumn, afterColumn, column));
-
-        ReorderBoardColumnRequest request = new ReorderBoardColumnRequest(beforeId, afterId);
-
-        BoardColumnResponse response
-                = columnReorderingService.reorderColumn(projectId, boardId, columnId, request);
-
-        assertThat(response.position().compareTo(BigDecimal.valueOf(2000)) == 0);
-    }
-
-
 }

@@ -43,4 +43,9 @@ public class PositionCalculator {
                 .compareTo(minGap) <= 0;
     }
 
+    public int paddingValue() {
+        return padding.intValue();
+    }
+
+
 }

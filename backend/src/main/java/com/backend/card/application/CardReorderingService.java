@@ -5,11 +5,12 @@ import com.backend.card.api.ReorderCardRequest;
 import com.backend.card.domain.Card;
 import com.backend.card.infrastructure.CardRepository;
 import com.backend.common.exception.ResourceNotFoundException;
-import com.backend.common.reordering.PositionCalculator;
+import com.backend.common.reordering.RebalancedNeighbors;
 import com.backend.common.reordering.ReorderingService;
 import com.backend.project_member.application.ProjectAuthorizationService;
 import com.backend.project_member.domain.ProjectPermission;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,28 +20,19 @@ import java.util.UUID;
 @Service
 public class CardReorderingService {
 
-    private static final BigDecimal MIN_POSITION_GAP = new BigDecimal("0.00001");
-    private static final BigDecimal POSITION_PADDING = new BigDecimal("1000");
-    private static final int POSITION_SCALE = 10; // numeric scale in db
-
     private final ProjectAuthorizationService projectAuthorizationService;
     private final ReorderingService<Card> reorderingService;
 
     private final CardRepository cardRepository;
 
-
     public CardReorderingService(
             ProjectAuthorizationService projectAuthorizationService,
-            CardRepository cardRepository
+            CardRepository cardRepository,
+            @Qualifier("cardReordering") ReorderingService<Card> reorderingService
     ) {
         this.projectAuthorizationService = projectAuthorizationService;
         this.cardRepository = cardRepository;
-        PositionCalculator posCalculator = new PositionCalculator(
-                MIN_POSITION_GAP,
-                POSITION_PADDING,
-                POSITION_SCALE
-        );
-        this.reorderingService = new ReorderingService<>(posCalculator);
+        this.reorderingService = reorderingService;
     }
 
 
@@ -73,20 +65,36 @@ public class CardReorderingService {
                 before,
                 after,
                 cardCount,
-                () -> rebalance(projectId, boardId, columnId)
+                () -> rebalance(projectId, boardId, columnId, before, after)
         );
 
         return toResponse(card);
     }
 
-    private void rebalance(UUID projectId, UUID boardId, UUID columnId) {
+    private RebalancedNeighbors<Card> rebalance(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            Card before,
+            Card after
+    ) {
         List<Card> cards = cardRepository.findAllInHierarchy(projectId, boardId, columnId);
 
-        int position = POSITION_PADDING.intValue();
+        int padding = reorderingService.padding();
+        int position = padding;
         for (Card card : cards) {
             card.setPosition(BigDecimal.valueOf(position));
-            position += POSITION_PADDING.intValue();
+            position += padding;
+
+            if(card.id().equals(before.id())) {
+                before = card;
+            }
+
+            if(card.id().equals(after.id())) {
+                after = card;
+            }
         }
+        return new RebalancedNeighbors<>(before, after);
     }
 
     private Card requirePresence(UUID projectId, UUID boardId, UUID columnId, UUID cardId) {
