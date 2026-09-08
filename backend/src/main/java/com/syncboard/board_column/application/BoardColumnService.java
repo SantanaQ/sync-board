@@ -1,0 +1,124 @@
+package com.syncboard.board_column.application;
+
+import com.syncboard.board.domain.Board;
+import com.syncboard.board.infrastructure.BoardRepository;
+import com.syncboard.board_column.api.BoardColumnResponse;
+import com.syncboard.board_column.api.CreateBoardColumnRequest;
+import com.syncboard.board_column.api.UpdateBoardColumnRequest;
+import com.syncboard.board_column.domain.BoardColumn;
+import com.syncboard.board_column.infrastructure.BoardColumnRepository;
+import com.syncboard.common.exception.ResourceNotFoundException;
+import com.syncboard.project_member.application.ProjectAuthorizationService;
+import com.syncboard.project_member.domain.ProjectPermission;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class BoardColumnService {
+
+    private final ProjectAuthorizationService projectAuthorizationService;
+
+    private final BoardRepository boardRepository;
+    private final BoardColumnRepository boardColumnRepository;
+
+    public BoardColumnService(
+            ProjectAuthorizationService projectAuthorizationService,
+            BoardRepository boardRepository,
+            BoardColumnRepository boardColumnRepository
+    ) {
+        this.projectAuthorizationService = projectAuthorizationService;
+        this.boardRepository = boardRepository;
+        this.boardColumnRepository = boardColumnRepository;
+    }
+
+    public List<BoardColumnResponse> getColumns(UUID projectId, UUID boardId) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_VIEW);
+
+        return boardColumnRepository
+                .findAllInHierarchy(boardId, projectId).stream()
+                .map(boardColumn -> new BoardColumnResponse(
+                        boardColumn.id(),
+                        boardColumn.name(),
+                        boardColumn.position())
+                ).toList();
+    }
+
+    @Transactional
+    public BoardColumnResponse createColumn(
+            UUID projectId,
+            UUID boardId,
+            CreateBoardColumnRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_CREATE);
+
+        Board board = boardRepository
+                .findByIdAndProjectId(boardId, projectId)
+                .orElseThrow(() ->
+                new ResourceNotFoundException("Board with id " + boardId + " not found.")
+        );
+
+        BigDecimal maxPos = boardColumnRepository.findMaxPositionByBoardId(boardId)
+                .add(BigDecimal.valueOf(1000));
+
+        BoardColumn column = new BoardColumn(board, request.name(), maxPos);
+
+        boardColumnRepository.save(column);
+
+        return toResponse(column);
+    }
+
+    @Transactional
+    public BoardColumnResponse updateColumn(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId,
+            UpdateBoardColumnRequest request
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_UPDATE);
+
+        BoardColumn column = requirePresence(projectId, boardId, columnId);
+        column.setName(request.name());
+
+        boardColumnRepository.save(column);
+        return toResponse(column);
+    }
+
+    @Transactional
+    public void deleteColumn(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId
+    ) {
+        projectAuthorizationService.requirePermission(projectId, ProjectPermission.COLUMN_DELETE);
+
+        BoardColumn column = requirePresence(projectId, boardId, columnId);
+
+        boardColumnRepository.delete(column);
+    }
+
+    private BoardColumn requirePresence(
+            UUID projectId,
+            UUID boardId,
+            UUID columnId
+    ) {
+        return boardColumnRepository
+                .findInHierarchy(projectId, boardId, columnId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Column with id " + columnId + " not found.")
+                );
+    }
+
+    private BoardColumnResponse toResponse(BoardColumn boardColumn) {
+        return new BoardColumnResponse(
+                boardColumn.id(),
+                boardColumn.name(),
+                boardColumn.position()
+        );
+    }
+
+
+}
