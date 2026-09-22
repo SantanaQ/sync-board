@@ -7,6 +7,8 @@ import com.syncboard.auth.infrastructure.JwtService;
 
 import com.syncboard.common.exception.InvalidCredentialsException;
 import com.syncboard.common.exception.ResourceAlreadyExistsException;
+import com.syncboard.common.exception.ResourceNotFoundException;
+import com.syncboard.user.api.UserResponse;
 import com.syncboard.user.domain.User;
 import com.syncboard.user.infrastructure.UserRepository;
 
@@ -16,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 
 @Service
@@ -89,5 +93,18 @@ public class AuthService {
                     "Wrong email or password."
             );
         }
+    }
+
+    public UserResponse me(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        return new UserResponse(
+                user.id(),
+                user.displayName(),
+                user.email()
+        );
     }
 }
