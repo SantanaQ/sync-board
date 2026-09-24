@@ -1,6 +1,7 @@
 import type {User} from "../authStore.ts";
+import {ApiError, type ApiErrorResponse} from "../../api/ApiError.ts";
 
-const baseUrl = "http://localhost:8080/api/auth";
+const baseUrl = "/api/auth";
 
 export type LoginRequest = {
     email: string;
@@ -34,6 +35,8 @@ export const login = async (
         body: JSON.stringify(reqeust)
     });
 
+    await assertResponseOk(response);
+
     return response.json();
 };
 
@@ -45,6 +48,8 @@ export const register = async (
         headers: setHeaders(),
         body: JSON.stringify(request)
     })
+
+    await assertResponseOk(response);
 
     return response.json();
 }
@@ -60,5 +65,18 @@ export const me = async (
         }
     })
 
+    await assertResponseOk(response);
+
     return response.json();
+}
+
+const assertResponseOk = async (response: Response) => {
+    if (!response.ok) {
+        const errorResponse: ApiErrorResponse = await response.json();
+
+        throw new ApiError(
+            response.status,
+            errorResponse
+        );
+    }
 }

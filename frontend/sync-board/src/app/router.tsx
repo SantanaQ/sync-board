@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import App from "./App.tsx";
-import LoginPage from "../auth/pages/LoginPage.tsx"
-import RegisterPage from "../auth/pages/RegisterPage.tsx";
+import LoginPage from "../pages/auth/LoginPage.tsx"
+import RegisterPage from "../pages/auth/RegisterPage.tsx";
+import WelcomePage from "../pages/WelcomePage.tsx";
 
 export default function Router() {
     return (
@@ -11,6 +12,7 @@ export default function Router() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/app" element={<App />} />
+                <Route path="/welcome" element={<WelcomePage />} />
             </Routes>
         </BrowserRouter>
     );

@@ -1,0 +1,12 @@
+package com.syncboard.common.exception;
+
+public enum ErrorCode {
+    RESOURCE_NOT_FOUND,
+    RESOURCE_ALREADY_EXIST,
+    INVALID_CREDENTIALS,
+    VALIDATION_FAILED,
+    ACCESS_DENIED,
+    UNAUTHORIZED,
+    BUSINESS_RULE_VIOLATION,
+    INTERNAL_SERVER_ERROR,
+}

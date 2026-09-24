@@ -1,5 +1,3 @@
-import type {LoginRequest, RegistrationRequest} from "./api/authApi.ts";
-
 export type AuthStatus =
     | "loading"
     | "authenticated"
@@ -17,14 +15,7 @@ export type AuthState = {
     authStatus: AuthStatus;
 };
 
-export type AuthContextValue = {
-    user: User | null;
-    authStatus: AuthStatus;
 
-    login: (request : LoginRequest) => Promise<void>;
-    register: (request: RegistrationRequest) => Promise<void>;
-    logout: () => Promise<void>;
-};
 
 
 

@@ -50,8 +50,7 @@ public class AuthServiceTest {
 
         String rawPassword = "test";
 
-        RegisterRequest request
-                = new RegisterRequest("test@email.com", "test", rawPassword);
+        RegisterRequest request = TestDataFactory.registerRequest(rawPassword);
 
         String passwordHash = "hashed";
 
@@ -81,7 +80,7 @@ public class AuthServiceTest {
     @Test
     void register_with_duplicate_email_throws_resource_already_exists() {
         RegisterRequest request
-                = new RegisterRequest("test@email.com", "test", "password");
+                = TestDataFactory.registerRequest("password");
 
         when(userRepository.existsByEmail(request.email())).thenReturn(true);
 

@@ -1,5 +1,6 @@
 package com.syncboard;
 
+import com.syncboard.auth.api.RegisterRequest;
 import com.syncboard.board.domain.Board;
 import com.syncboard.board_column.api.CreateBoardColumnRequest;
 import com.syncboard.board_column.api.UpdateBoardColumnRequest;
@@ -130,6 +131,15 @@ public class TestDataFactory {
 
     public static MoveCardRequest moveCardRequest(UUID newColumnId) {
         return new MoveCardRequest(newColumnId);
+    }
+
+    public static RegisterRequest registerRequest(String password) {
+        return new RegisterRequest(
+                "test@email.com",
+                "displayName",
+                password,
+                password
+        );
     }
 
 

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Map;
 
 public record ErrorResponse(
+        ErrorCode code,
         String message,
         Instant timestamp,
         Map<String, String> errors

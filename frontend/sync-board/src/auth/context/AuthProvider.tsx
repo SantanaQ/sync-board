@@ -1,8 +1,9 @@
 import {type ReactNode, useState} from "react";
-import type {AuthState} from "./authStore.ts";
-import * as authApi from "./api/authApi";
-import type {LoginRequest, RegistrationRequest} from "./api/authApi";
+import type { AuthState } from "../authStore.ts";
+import * as authApi from "../api/authClient.ts";
+import type {LoginRequest, RegistrationRequest} from "../api/authClient.ts";
 import { AuthContext } from "./AuthContext.ts";
+
 
 export function AuthProvider({ children }: {children: ReactNode}) {
     const [authState, setAuthState] = useState<AuthState>({

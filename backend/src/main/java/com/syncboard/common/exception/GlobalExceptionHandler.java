@@ -20,9 +20,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> resourceNotFound(ResourceNotFoundException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.RESOURCE_NOT_FOUND,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -32,9 +33,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> resourceAlreadyExists(ResourceAlreadyExistsException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.RESOURCE_ALREADY_EXIST,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -44,9 +46,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> badCredentials(InvalidCredentialsException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.INVALID_CREDENTIALS,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -68,10 +71,12 @@ public class GlobalExceptionHandler {
                                 error -> Objects.requireNonNullElse(
                                         error.getDefaultMessage(),
                                         "Invalid value"
-                                )
+                                ),
+                                (first, second) -> first
                         ));
 
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.VALIDATION_FAILED,
                 "Validation failed",
                 Instant.now(),
                 errors
@@ -85,9 +90,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> accessDenied(AccessDeniedException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.ACCESS_DENIED,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -97,9 +103,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedOperationException.class)
     public ResponseEntity<ErrorResponse> unauthorizedOperation(UnauthorizedOperationException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.UNAUTHORIZED,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -109,12 +116,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ResponseEntity<ErrorResponse> businessRuleViolation(BusinessRuleViolationException e) {
         ErrorResponse response = new ErrorResponse(
+                ErrorCode.BUSINESS_RULE_VIOLATION,
                 e.getMessage(),
                 Instant.now(),
-                null
+                Map.of()
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> unexpectedException(Exception e) {
+
+        //TODO: add logging
+        e.printStackTrace();
+
+        ErrorResponse response = new ErrorResponse(
+                ErrorCode.INTERNAL_SERVER_ERROR,
+                "Oops, something went wrong.",
+                Instant.now(),
+                Map.of()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(response);
     }
 
