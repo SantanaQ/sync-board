@@ -1,6 +1,6 @@
 package com.syncboard.auth.infrastructure;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.syncboard.config.JwtProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -15,12 +15,11 @@ import java.time.Instant;
 public class JwtService {
 
     private final JwtEncoder jwtEncoder;
+    private final JwtProperties jwtProperties;
 
-    @Value("${jwt.expirationMs}")
-    private long expirationMs;
-
-    public JwtService(JwtEncoder jwtEncoder) {
+    public JwtService(JwtEncoder jwtEncoder, JwtProperties jwtProperties) {
         this.jwtEncoder = jwtEncoder;
+        this.jwtProperties = jwtProperties;
     }
 
     public String generateToken(Authentication authentication) {
@@ -30,7 +29,7 @@ public class JwtService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(authentication.getName())
                 .issuedAt(now)
-                .expiresAt(now.plusMillis(expirationMs))
+                .expiresAt(now.plus(jwtProperties.expiration()))
                 .build();
 
         return jwtEncoder

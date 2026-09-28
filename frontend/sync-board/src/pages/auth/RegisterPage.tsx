@@ -56,15 +56,15 @@ export default function RegisterPage() {
     const handleChange = (
         event: ChangeEvent<HTMLInputElement>
     ) => {
-        const { name, value } = event.target;
+        const { id, value } = event.target;
 
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [id]: value,
         }));
 
-        if (fieldErrors[name]) {
-            clearFieldError(name);
+        if (fieldErrors[id]) {
+            clearFieldError(id);
         }
     };
 
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                         >
                             <TextInput
                                 id="displayName"
-                                label="name"
+                                label="Name"
                                 type="text"
                                 required
                                 value={formData.displayName}

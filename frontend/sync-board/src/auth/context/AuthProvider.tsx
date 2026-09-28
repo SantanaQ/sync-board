@@ -1,6 +1,6 @@
-import {type ReactNode, useState} from "react";
+import {type ReactNode, useEffect, useState} from "react";
 import type { AuthState } from "../authStore.ts";
-import * as authApi from "../api/authClient.ts";
+import * as authClient from "../api/authClient.ts";
 import type {LoginRequest, RegistrationRequest} from "../api/authClient.ts";
 import { AuthContext } from "./AuthContext.ts";
 
@@ -8,41 +8,61 @@ import { AuthContext } from "./AuthContext.ts";
 export function AuthProvider({ children }: {children: ReactNode}) {
     const [authState, setAuthState] = useState<AuthState>({
         user: null,
-        accessToken: null,
         authStatus: 'loading',
     });
 
     async function login(credentials : LoginRequest) {
-        const { accessToken } = await authApi.login(credentials);
+         await authClient.login(credentials);
 
-        const user = await authApi.me(accessToken);
+
+        const user = await authClient.me();
 
         setAuthState({
             user,
-            accessToken,
             authStatus: "authenticated"
         });
     }
 
     async function register(data : RegistrationRequest) {
-        const { accessToken } = await authApi.register(data);
+        await authClient.register(data);
 
-        const user = await authApi.me(accessToken);
+        const user = await authClient.me();
 
         setAuthState({
             user,
-            accessToken,
             authStatus: "authenticated"
         });
     }
 
     async function logout() {
+        await authClient.logout();
+
         setAuthState({
             user: null,
-            accessToken: null,
             authStatus: "unauthenticated"
         })
     }
+
+    useEffect(() => {
+        async function initializeAuth() {
+            try {
+                const user = await authClient.me();
+
+                setAuthState({
+                    user,
+                    authStatus: "authenticated",
+                });
+            } catch {
+
+                setAuthState({
+                    user: null,
+                    authStatus: "unauthenticated",
+                });
+            }
+        }
+
+        initializeAuth();
+    }, []);
 
     return (
         <AuthContext.Provider

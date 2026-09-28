@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useApiError } from "../../hooks/useApiError";
@@ -15,6 +15,11 @@ export default function LoginPage() {
 
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const location = useLocation();
+
+    const from =
+        location.state?.from?.pathname ?? "/welcome";
 
     const {
         fieldErrors,
@@ -37,7 +42,7 @@ export default function LoginPage() {
                 password,
             });
 
-            navigate("/welcome");
+            navigate(from, { replace: true });
         } catch (error) {
             handleApiError(error);
         } finally {

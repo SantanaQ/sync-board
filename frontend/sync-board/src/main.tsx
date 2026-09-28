@@ -7,10 +7,10 @@ import {ToastProvider} from "./context/ToastProvider.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <AuthProvider>
-            <ToastProvider>
+        <ToastProvider>
+            <AuthProvider>
                 <Router />
-            </ToastProvider>
-        </AuthProvider>
-    </StrictMode>,
+            </AuthProvider>
+        </ToastProvider>
+    </StrictMode>
 )

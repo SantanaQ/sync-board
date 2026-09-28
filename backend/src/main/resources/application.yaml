@@ -21,6 +21,11 @@ spring:
     validate-on-migrate: true
     validate-migration-naming: true
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+
 jwt:
   secret: I2bCYX797KGbFgkFEa3gl7wVfQ3/1NqASOF/cc+ijM0=
-  expirationMs: 288000000 # 8 hours
+  expiration: 8h
+  cookie-secure: false

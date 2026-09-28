@@ -2,9 +2,12 @@ package com.syncboard.auth.api;
 
 import com.syncboard.auth.application.AuthService;
 import com.syncboard.user.api.UserResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("api/auth")
@@ -17,23 +20,37 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(
-            @Valid @RequestBody RegisterRequest request
+    public ResponseEntity<Void> register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletResponse response
     ) {
-        return authService.register(request);
+        authService.register(request, response);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/login")
-    public AuthResponse login(
-            @Valid @RequestBody LoginRequest request
+    public ResponseEntity<Void> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
     ) {
-        return authService.login(request);
+        authService.login(request, response);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            HttpServletResponse response
+    ) {
+        authService.logout(response);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
         return authService.me(authentication);
     }
-
 
 }

@@ -9,12 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -168,30 +165,6 @@ public class AuthControllerTest {
     }
 
     @Test
-    void valid_registration_details_in_register_returns_jwt() throws Exception {
-        String json = """
-            {
-                "email": "test@mail.com",
-                "displayName": "user",
-                "password": "password123"
-            }
-            """;
-
-        String jwt = "valid-token";
-
-        when(authService.register(any())).thenReturn(new AuthResponse(jwt));
-
-        mockMvc.perform(
-                        post("/api/auth/register")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value(jwt));
-
-    }
-
-    @Test
     void blank_password_in_login_is_not_accepted() throws Exception {
         String json = """
             {
@@ -229,28 +202,5 @@ public class AuthControllerTest {
 
         verifyNoInteractions(authService);
     }
-
-    @Test
-    void valid_credentials_in_login_returns_jwt() throws Exception {
-        String json = """
-            {
-                "email": "test@mail.com",
-                "password": "password123"
-            }
-            """;
-
-        String jwt = "valid-token";
-
-        when(authService.login(any())).thenReturn(new AuthResponse(jwt));
-
-        mockMvc.perform(
-                        post("/api/auth/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value(jwt));
-    }
-
 
 }
