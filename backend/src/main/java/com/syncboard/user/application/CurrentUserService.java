@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class CurrentUserService {
 
@@ -20,12 +22,12 @@ public class CurrentUserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("User not found.");
         }
 
-        return userRepository.findByEmail(authentication.getName())
+        return userRepository.findById(UUID.fromString(authentication.getName()))
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found")
+                        new ResourceNotFoundException("User not found.")
                 );
     }
 

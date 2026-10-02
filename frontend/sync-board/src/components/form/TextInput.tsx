@@ -22,7 +22,6 @@ export function TextInput({
         <FormField id={id} label={label} error={error} required={required}>
             <input
                 id={id}
-                required={required}
                 aria-invalid={!!error}
                 aria-describedby={error ? errorId : undefined}
                 className={`

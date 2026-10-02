@@ -1,6 +1,6 @@
 import type {HTMLAttributes} from "react";
 
-const SVGComponent = (props : HTMLAttributes<any>) => (
+const TempLogo = (props : HTMLAttributes<any>) => (
     <svg
         viewBox="0 0 1024 1024"
         className="icon"
@@ -26,4 +26,4 @@ const SVGComponent = (props : HTMLAttributes<any>) => (
         />
     </svg>
 );
-export default SVGComponent;
+export default TempLogo;

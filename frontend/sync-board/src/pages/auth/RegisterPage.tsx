@@ -43,7 +43,7 @@ export default function RegisterPage() {
                 passwordConfirmation: formData.passwordConfirmation,
             });
 
-            navigate("/welcome");
+            navigate("/dashboard");
 
         } catch (error) {
             handleApiError(error);

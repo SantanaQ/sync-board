@@ -19,7 +19,7 @@ export default function LoginPage() {
     const location = useLocation();
 
     const from =
-        location.state?.from?.pathname ?? "/welcome";
+        location.state?.from?.pathname ?? "/dashboard";
 
     const {
         fieldErrors,

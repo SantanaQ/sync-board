@@ -24,8 +24,6 @@ export function FormField({
                     inline-block
                     text-sm
                     font-medium
-                    text-slate-900
-                    dark:text-slate-50
                 "
             >
                 {label}
