@@ -1,5 +1,6 @@
 package com.syncboard.user.application;
 
+import com.syncboard.common.exception.InvalidCredentialsException;
 import com.syncboard.common.exception.ResourceNotFoundException;
 import com.syncboard.user.domain.User;
 import com.syncboard.user.infrastructure.UserRepository;
@@ -21,9 +22,10 @@ public class CurrentUserService {
     public User get() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null) {
-            throw new ResourceNotFoundException("User not found.");
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new InvalidCredentialsException("User is not authenticated.");
         }
+
 
         return userRepository.findById(UUID.fromString(authentication.getName()))
                 .orElseThrow(() ->

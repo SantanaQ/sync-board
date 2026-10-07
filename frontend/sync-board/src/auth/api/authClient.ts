@@ -1,4 +1,3 @@
-import type {User} from "../authStore.ts";
 import {ApiError, type ApiErrorResponse} from "../../api/ApiError.ts";
 
 const baseUrl = "/api/auth";
@@ -62,19 +61,6 @@ export const register = async (
     })
 
     await assertResponseOk(response);
-}
-
-export const me = async (
-):  Promise<User> => {
-    const response = await fetch(`${baseUrl}/me`, {
-        method: "GET",
-        headers: setHeaders(),
-        credentials: "include"
-    })
-
-    await assertResponseOk(response);
-
-    return response.json();
 }
 
 export const logout = async (

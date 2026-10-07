@@ -1,9 +1,10 @@
 import { createContext } from "react";
-import type {AuthStatus, User} from "../authStore.ts";
+import type {AuthStatus} from "../authStore.ts";
 import type {LoginRequest, RegistrationRequest} from "../api/authClient.ts";
+import type {UserResponse} from "../../api/types.ts";
 
 type AuthContextValue = {
-    user: User | null;
+    user: UserResponse | null;
     authStatus: AuthStatus;
 
     login: (request : LoginRequest) => Promise<void>;

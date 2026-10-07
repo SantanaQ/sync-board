@@ -1,6 +1,7 @@
 import {type ReactNode, useEffect, useState} from "react";
 import type { AuthState } from "../authStore.ts";
 import * as authClient from "../api/authClient.ts";
+import * as userClient from "../../api/userClient.ts"
 import type {LoginRequest, RegistrationRequest} from "../api/authClient.ts";
 import { AuthContext } from "./AuthContext.ts";
 
@@ -15,7 +16,7 @@ export function AuthProvider({ children }: {children: ReactNode}) {
          await authClient.login(credentials);
 
 
-        const user = await authClient.me();
+        const user = await userClient.me();
 
         setAuthState({
             user,
@@ -26,7 +27,7 @@ export function AuthProvider({ children }: {children: ReactNode}) {
     async function register(data : RegistrationRequest) {
         await authClient.register(data);
 
-        const user = await authClient.me();
+        const user = await userClient.me();
 
         setAuthState({
             user,
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: {children: ReactNode}) {
     useEffect(() => {
         async function initializeAuth() {
             try {
-                const user = await authClient.me();
+                const user = await userClient.me();
 
                 setAuthState({
                     user,

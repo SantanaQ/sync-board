@@ -142,68 +142,6 @@ class AuthServiceTest {
                 .setAuthCookie(response, jwt);
     }
 
-
-    @Test
-    void me_with_not_existing_principal_throws_resource_not_found() {
-
-        UUID userId = UUID.randomUUID();
-
-        Authentication authentication =
-                mock(Authentication.class);
-
-        when(authentication.getName())
-                .thenReturn(userId.toString());
-
-        when(userRepository.findById(userId))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(
-                () -> authService.me(authentication)
-        )
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-
-    @Test
-    void me_with_invalid_principal_throws_illegal_argument_exception() {
-
-        Authentication authentication =
-                mock(Authentication.class);
-
-        when(authentication.getName())
-                .thenReturn("not-a-uuid");
-
-        assertThatThrownBy(
-                () -> authService.me(authentication)
-        )
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-
-    @Test
-    void me_with_valid_authentication_returns_user() {
-
-        UUID userId = UUID.randomUUID();
-
-        User user = TestDataFactory.user(userId);
-
-        Authentication authentication =
-                mock(Authentication.class);
-
-        when(authentication.getName())
-                .thenReturn(userId.toString());
-
-        when(userRepository.findById(userId))
-                .thenReturn(Optional.of(user));
-
-        UserResponse response =
-                authService.me(authentication);
-
-        assertThat(response.email())
-                .isEqualTo(user.email());
-    }
-
-
     @Test
     void logout_clears_auth_cookie() {
 

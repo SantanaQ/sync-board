@@ -12,9 +12,14 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CurrentUserService currentUserService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(
+            UserRepository userRepository,
+            CurrentUserService currentUserService
+    ) {
         this.userRepository = userRepository;
+        this.currentUserService = currentUserService;
     }
 
     public UserResponse getUser(UUID id) {
@@ -23,6 +28,16 @@ public class UserService {
                                 "User with id" + id + " not found."
                         )
                 );
+        return new UserResponse(
+                user.id(),
+                user.displayName(),
+                user.email()
+        );
+    }
+
+    public UserResponse me() {
+        User user = currentUserService.get();
+
         return new UserResponse(
                 user.id(),
                 user.displayName(),

@@ -32,4 +32,3 @@ export type ProjectListResponse = {
     updatedAt: string;
     currentUserRole: string;
 }
-

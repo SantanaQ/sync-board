@@ -1,3 +1,5 @@
+import type {UserResponse} from "../api/types.ts";
+
 export type AuthStatus =
     | "loading"
     | "authenticated"
@@ -10,7 +12,7 @@ export type User = {
 };
 
 export type AuthState = {
-    user: User | null;
+    user: UserResponse | null;
     authStatus: AuthStatus;
 };
 

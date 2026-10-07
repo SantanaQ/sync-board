@@ -48,9 +48,4 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/me")
-    public UserResponse me(Authentication authentication) {
-        return authService.me(authentication);
-    }
-
 }

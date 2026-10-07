@@ -1,5 +1,6 @@
 package com.syncboard.user.application;
 
+import com.syncboard.TestDataFactory;
 import com.syncboard.common.exception.ResourceNotFoundException;
 import com.syncboard.user.api.UserResponse;
 import com.syncboard.user.domain.User;
@@ -27,11 +28,14 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CurrentUserService currentUserService;
+
     @InjectMocks
     private UserService userService;
 
     @Test
-    void returns_user_when_user_exists() {
+    void getUser_returns_user_when_user_exists() {
         UUID id = UUID.randomUUID();
 
         User user = new User(
@@ -53,7 +57,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void throws_resource_not_found_exception_when_user_does_not_exist() {
+    void getUser_throws_resource_not_found_exception_when_user_does_not_exist() {
         UUID id = UUID.randomUUID();
 
         when(userRepository.findById(id))
@@ -64,5 +68,38 @@ public class UserServiceTest {
 
         verify(userRepository).findById(id);
     }
+
+    @Test
+    void me_with_current_user_returns_user_response() {
+
+        UUID userId = UUID.randomUUID();
+        User user = TestDataFactory.user(userId);
+
+        when(currentUserService.get())
+                .thenReturn(user);
+
+        UserResponse response = userService.me();
+
+        assertThat(response.id())
+                .isEqualTo(user.id());
+
+        assertThat(response.displayName())
+                .isEqualTo(user.displayName());
+
+        assertThat(response.email())
+                .isEqualTo(user.email());
+    }
+
+
+    @Test
+    void me_when_current_user_service_throws_exception_propagates_exception() {
+
+        when(currentUserService.get())
+                .thenThrow(new ResourceNotFoundException("User not found."));
+
+        assertThatThrownBy(() -> userService.me())
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
 
 }

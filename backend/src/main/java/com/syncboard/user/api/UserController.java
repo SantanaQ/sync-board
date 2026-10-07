@@ -20,4 +20,9 @@ public class UserController {
     public UserResponse getUser(@PathVariable UUID id) {
         return userService.getUser(id);
     }
+
+    @GetMapping("/me")
+    public UserResponse me() {
+        return userService.me();
+    }
 }
