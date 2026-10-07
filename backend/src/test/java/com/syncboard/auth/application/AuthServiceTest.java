@@ -5,9 +5,6 @@ import com.syncboard.auth.api.LoginRequest;
 import com.syncboard.auth.api.RegisterRequest;
 import com.syncboard.auth.infrastructure.JwtService;
 import com.syncboard.common.exception.ResourceAlreadyExistsException;
-import com.syncboard.common.exception.ResourceNotFoundException;
-import com.syncboard.user.api.UserResponse;
-import com.syncboard.user.domain.User;
 import com.syncboard.user.infrastructure.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
@@ -19,10 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
