@@ -1,9 +1,11 @@
 package com.syncboard.auth.api;
 
+import com.syncboard.common.validation.PasswordConfirmation;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@PasswordConfirmation
 public record RegisterRequest(
         @NotBlank
         @Email
@@ -18,7 +20,6 @@ public record RegisterRequest(
         String password,
 
         @NotBlank
-        @Size(min = 8, max = 100)
         String passwordConfirmation
 ) {
 }

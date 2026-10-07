@@ -30,7 +30,8 @@ public class AuthControllerTest {
             {
                 "email": "foo",
                 "displayName": "user",
-                "password": "password123"
+                "password": "password123",
+                "passwordConfirmation": "password123"
             }
             """;
 
@@ -50,7 +51,8 @@ public class AuthControllerTest {
             {
                 "email": "",
                 "displayName": "user",
-                "password": "password123"
+                "password": "password123",
+                "passwordConfirmation": "password123"
             }
             """;
 
@@ -70,7 +72,8 @@ public class AuthControllerTest {
             {
                 "email": "test@mail.com",
                 "displayName": "",
-                "password": "password123"
+                "password": "password123",
+                "passwordConfirmation": "password123"
             }
             """;
 
@@ -90,7 +93,8 @@ public class AuthControllerTest {
             {
                 "email": "test@mail.com",
                 "displayName": "user",
-                "password": ""
+                "password": "",
+                "passwordConfirmation": ""
             }
             """;
 
@@ -110,7 +114,8 @@ public class AuthControllerTest {
             {
                 "email": "test@mail.com",
                 "displayName": "user",
-                "password": "1234"
+                "password": "1234",
+                "passwordConfirmation": "1234"
             }
             """;
 
@@ -130,7 +135,8 @@ public class AuthControllerTest {
             {
                 "email": "test@mail.com",
                 "displayName": "user",
-                "password": "knTm1FgjvNhtgVJfjrrfKeMQqtacWn0KkKK0N8zRVZFfLhWtxhpa9wMehJUYvK3jZvpijAAE0gjwtfWJgGFMkFEGqKYFn3inPHKb3"
+                "password": "knTm1FgjvNhtgVJfjrrfKeMQqtacWn0KkKK0N8zRVZFfLhWtxhpa9wMehJUYvK3jZvpijAAE0gjwtfWJgGFMkFEGqKYFn3inPHKb3",
+                "passwordConfirmation": "knTm1FgjvNhtgVJfjrrfKeMQqtacWn0KkKK0N8zRVZFfLhWtxhpa9wMehJUYvK3jZvpijAAE0gjwtfWJgGFMkFEGqKYFn3inPHKb3"
             }
             """;
 
@@ -145,12 +151,34 @@ public class AuthControllerTest {
     }
 
     @Test
-    void displayName_with_size_greater_than_one_hundred_in_registration_is__not_accepted() throws Exception {
+    void displayName_with_size_greater_than_one_hundred_in_registration_is_not_accepted() throws Exception {
         String json = """
             {
                 "email": "test@mail.com",
                 "displayName": "iQjfMbAaYM2mHhkgiqAgBXkwQtRS5WaPkhJEkBNFUAShRMZ3U036x6rbCddx24S1HqZQZZcR02vc5XD16D7nxF26jqFCHB3tr6jHg",
-                "password": "password123"
+                "password": "password123",
+                "passwordConfirmation": "password123"
+            }
+            """;
+
+        mockMvc.perform(
+                        post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)
+                )
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(authService);
+    }
+
+    @Test
+    void not_matching_password_confirmation_in_registration_is_not_accepted() throws Exception {
+        String json = """
+            {
+                "email": "test@mail.com",
+                "displayName": "user",
+                "password": "password1234",
+                "passwordConfirmation": "password1235"
             }
             """;
 

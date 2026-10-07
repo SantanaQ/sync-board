@@ -142,5 +142,14 @@ public class TestDataFactory {
         );
     }
 
+    public static RegisterRequest registerRequest(String password, String passwordConfirmation) {
+        return new RegisterRequest(
+                "test@email.com",
+                "displayName",
+                password,
+                passwordConfirmation
+        );
+    }
+
 
 }
