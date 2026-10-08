@@ -1,12 +1,9 @@
 import {useState} from "react";
-
 import {ListPage} from "./ListPage";
 import {getProjects, deleteProject} from "../../api/projectClient.ts";
 import type {ProjectListResponse} from "../../api/types.ts";
 import {useCrudList} from "../../hooks/useCrudList.ts";
-
 import CreateProjectModal from "../../components/project/CreateProjectModal.tsx";
-
 import {ProjectListItem} from "./ProjectListItem.tsx";
 import {useToast} from "../../hooks/useToast.ts";
 

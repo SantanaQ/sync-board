@@ -8,11 +8,15 @@ import type {BoardListResponse, ProjectResponse} from "../../api/types.ts";
 import UpdateProjectModal from "../../components/project/UpdateProjectModal.tsx";
 import CreateBoardModal from "../../components/board/CreateBoardModal.tsx";
 import {formatDateStr} from "../../utils/formatDate.ts";
+import {useToast} from "../../hooks/useToast.ts";
 
 export default function ProjectDetailPage() {
     const { projectId } = useParams();
+    const { showSuccess } = useToast();
+
     const [project, setProject] = useState<ProjectResponse | undefined>();
     const [boards, setBoards] = useState<BoardListResponse[]>([]);
+
     const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
     const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
 
@@ -33,6 +37,15 @@ export default function ProjectDetailPage() {
     useEffect(() => {
         refresh();
     }, []);
+
+    const onUpdated = () => {
+        refresh().then(() => showSuccess("Successfully updated project."));
+    }
+
+    const onCreated = () => {
+        refresh().then(() => showSuccess("Successfully created board."));
+    }
+
 
     if (!project) {
         return null;
@@ -189,12 +202,12 @@ export default function ProjectDetailPage() {
                 open={updateModalOpen}
                 project={project}
                 onClose={() => setUpdateModalOpen(false)}
-                onUpdated={refresh}
+                onUpdated={onUpdated}
             />
             <CreateBoardModal
                 open={createBoardModalOpen}
                 onClose={() => setCreateBoardModalOpen(false)}
-                onCreated={refresh}
+                onCreated={onCreated}
             />
         </>
     );
