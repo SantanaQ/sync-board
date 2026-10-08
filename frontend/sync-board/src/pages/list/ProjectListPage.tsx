@@ -3,48 +3,39 @@ import {useState} from "react";
 import {ListPage} from "./ListPage";
 import {getProjects, deleteProject} from "../../api/projectClient.ts";
 import type {ProjectListResponse} from "../../api/types.ts";
-import {useApiError} from "../../hooks/useApiError.ts";
 import {useCrudList} from "../../hooks/useCrudList.ts";
 
 import CreateProjectModal from "../../components/project/CreateProjectModal.tsx";
-import UpdateProjectModal from "../../components/project/UpdateProjectModal.tsx";
 
 import {ProjectListItem} from "./ProjectListItem.tsx";
+import {useToast} from "../../hooks/useToast.ts";
 
 export default function ProjectListPage() {
-    const {handleApiError} = useApiError();
+    const {showSuccess} = useToast();
 
     const {
         items: projects,
         isLoading,
         refresh,
-        remove,
     } = useCrudList<ProjectListResponse>({
         fetchItems: getProjects,
         deleteItem: deleteProject,
     });
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [updateModalOpen, setUpdateModalOpen] = useState(false);
-    const [editingProject, setEditingProject] = useState<ProjectListResponse | null>(null);
 
-    const openEdit = (project : ProjectListResponse) => {
-        setEditingProject(project);
-        setUpdateModalOpen(true);
+    const onCreated = () => {
+        refresh().then(() => showSuccess("Successfully created project."));
     }
 
-    const closeEdit = () => {
-        setEditingProject(null);
-        setUpdateModalOpen(false);
+    const onUpdated = () => {
+        refresh().then(() => showSuccess("Successfully updated project."));
     }
 
-    const handleDelete = async (project: ProjectListResponse) => {
-        try {
-            await remove(project.id);
-        } catch (error) {
-            handleApiError(error);
-        }
-    };
+    const onDeleted = () => {
+        refresh().then(() => showSuccess("Successfully deleted project."));
+    }
+
 
     return (
         <>
@@ -74,26 +65,16 @@ export default function ProjectListPage() {
                 renderItem={(project) => (
                     <ProjectListItem
                         project={project}
-                        onEdit={() => openEdit(project)}
-                        onDelete={() => handleDelete(project)}
+                        onEdited={onUpdated}
+                        onDeleted={onDeleted}
                     />
                 )}
             />
-
             <CreateProjectModal
                 open={createModalOpen}
                 onClose={() => setCreateModalOpen(false)}
-                onCreated={refresh}
+                onCreated={onCreated}
             />
-
-            {editingProject && (
-                <UpdateProjectModal
-                    open={updateModalOpen}
-                    project={editingProject}
-                    onClose={() => closeEdit()}
-                    onUpdated={refresh}
-                />
-            )}
         </>
     );
 }

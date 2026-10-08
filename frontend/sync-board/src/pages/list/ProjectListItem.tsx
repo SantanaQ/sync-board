@@ -4,19 +4,25 @@ import {formatDateStr} from "../../utils/formatDate.ts";
 import DropdownMenu from "../../components/ui/DropdownMenu.tsx";
 import {DropdownMenuItem} from "../../components/ui/DropdownMenuItem.tsx";
 import type {ProjectListResponse} from "../../api/types.ts";
+import DeleteProjectModal from "../../components/project/DeleteProjectModal.tsx";
+import {useState} from "react";
+import UpdateProjectModal from "../../components/project/UpdateProjectModal.tsx";
 
 type ProjectListItemProps = {
     project: ProjectListResponse;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdited: () => void;
+    onDeleted: () => void;
 };
 
 export function ProjectListItem({
                              project,
-                             onEdit,
-                             onDelete,
+                             onEdited,
+                             onDeleted
                          }: ProjectListItemProps) {
     const navigate = useNavigate();
+
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
     return (
         <div className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-hover">
@@ -64,7 +70,7 @@ export function ProjectListItem({
 
                     <DropdownMenuItem
                         icon={<Edit3 className="h-4 w-4"/>}
-                        onClick={onEdit}
+                        onClick={() => setUpdateModalOpen(true)}
                     >
                         Edit
                     </DropdownMenuItem>
@@ -74,12 +80,24 @@ export function ProjectListItem({
                     <DropdownMenuItem
                         icon={<Trash2 className="h-4 w-4"/>}
                         destructive
-                        onClick={onDelete}
+                        onClick={() => setDeleteModalOpen(true)}
                     >
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenu>
             </div>
+            <DeleteProjectModal
+                open={deleteModalOpen}
+                project={project}
+                onClose={() => setDeleteModalOpen(false)}
+                onDeleted={onDeleted}
+            />
+            <UpdateProjectModal
+                open={updateModalOpen}
+                project={project}
+                onClose={() => setUpdateModalOpen(false)}
+                onUpdated={onEdited}
+            />
         </div>
     );
 }
