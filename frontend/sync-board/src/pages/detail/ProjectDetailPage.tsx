@@ -114,11 +114,12 @@ export default function ProjectDetailPage() {
                                             <Link
                                                 to={`/projects/${project.id}/boards/${board.id}`}
                                                 className="
-                                            flex items-center justify-between
-                                            px-5 py-4
-                                            transition-colors
-                                            hover:bg-surface-muted
-                                        "
+                                                        flex items-center justify-between
+                                                        px-5 py-4
+                                                        transition-colors
+                                                        hover:bg-surface-muted
+                                                    "
+                                                state={{ parent: project }}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div

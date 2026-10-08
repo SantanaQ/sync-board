@@ -50,3 +50,7 @@ export type BoardListResponse = {
 export type CreateBoardRequest = {
     name: string;
 }
+
+export type UpdateBoardRequest = {
+    name: string;
+}

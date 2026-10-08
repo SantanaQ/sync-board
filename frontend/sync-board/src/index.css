@@ -20,6 +20,9 @@
     --accent: 15 82 186;
     --accent-hover: 17 52 166;
     --accent-soft: 238 242 255;
+
+    --warning: 239 68 68;
+    --warning-hover: 220 38 38;
 }
 
 
@@ -173,6 +176,33 @@
         transform: translateY(1px);
     }
 
+    .btn-warning {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        border-radius: 0.625rem;
+
+        background: rgb(var(--warning));
+        padding: 0.625rem 0.875rem;
+
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+
+        transition:
+                background-color 150ms ease,
+                transform 150ms ease;
+    }
+
+    .btn-warning:hover {
+        background: rgb(var(--warning-hover));
+    }
+
+    .btn-warning:active {
+        transform: translateY(1px);
+    }
 
     .btn-ghost {
         display: inline-flex;

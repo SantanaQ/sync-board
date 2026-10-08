@@ -1,10 +1,12 @@
 import type {Column} from "../../pages/board/BoardPage.tsx";
-import {MoreHorizontal, Plus} from "lucide-react";
+import {Edit3, Plus, Trash2} from "lucide-react";
 import {KanbanCard} from "./KanbanCard.tsx";
+import DropdownMenu from "../ui/DropdownMenu.tsx";
+import {DropdownMenuItem} from "../ui/DropdownMenuItem.tsx";
 
 export function KanbanColumn({
-                          column,
-                      }: {
+                                 column,
+                             }: {
     column: Column;
 }) {
     return (
@@ -12,15 +14,18 @@ export function KanbanColumn({
             className="
                 flex
                 w-[280px]
+                h-full
+                max-h-full
                 shrink-0
                 flex-col
+                overflow-hidden
                 rounded-xl
                 border border-border
                 bg-surface-muted
             "
         >
             {/* Column Header */}
-            <header className="flex items-center justify-between px-3 py-3">
+            <header className="flex shrink-0 items-center justify-between px-3 py-3">
                 <div className="flex items-center gap-2">
                     <h2 className="text-sm font-semibold text-primary">
                         {column.title}
@@ -40,29 +45,40 @@ export function KanbanColumn({
                     </span>
                 </div>
 
-                <button
-                    type="button"
-                    className="icon-button h-7 w-7"
-                    aria-label={`${column.title} Optionen`}
-                >
-                    <MoreHorizontal className="h-4 w-4" />
-                </button>
+                <DropdownMenu>
+                    <DropdownMenuItem
+                        icon={<Edit3 className="h-4 w-4"/>}
+                        onClick={() => {}}
+                    >
+                        Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        icon={<Trash2 className="h-4 w-4"/>}
+                        destructive
+                        onClick={() => {}}
+                    >
+                        Delete
+                    </DropdownMenuItem>
+                </DropdownMenu>
             </header>
 
-            {/* Cards */}
-            <div className="flex flex-1 flex-col gap-2 px-2 pb-2">
-                {column.cards.map((card) => (
-                    <KanbanCard
-                        key={card.id}
-                        card={card}
-                    />
-                ))}
+            {/* Cards Container & Add Button Wrapper */}
+            <div className="flex flex-1 flex-col overflow-hidden px-2 pb-2">
 
-                {/* Add card */}
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                    {column.cards.map((card, index) => (
+                        <KanbanCard
+                            key={`${card.id}-${index}`}
+                            card={card}
+                        />
+                    ))}
+                </div>
+
+                {/* Add card Button */}
                 <button
                     type="button"
                     className="
-                        flex items-center gap-2
+                        mt-2 flex shrink-0 items-center gap-2
                         rounded-lg
                         px-3 py-2.5
                         text-left text-xs font-medium
@@ -73,7 +89,7 @@ export function KanbanColumn({
                     "
                 >
                     <Plus className="h-4 w-4" />
-                    Karte hinzufügen
+                    Add card
                 </button>
             </div>
         </section>
