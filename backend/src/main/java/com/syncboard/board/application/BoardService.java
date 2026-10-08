@@ -42,6 +42,7 @@ public class BoardService {
         return boardRepository.findAllByProjectId(projectId)
                 .stream()
                 .map(board -> new BoardListResponse(
+                        board.id(),
                         board.name(),
                         board.createdAt(),
                         board.updatedAt()
@@ -55,6 +56,7 @@ public class BoardService {
         Board board = requirePresence(boardId, projectId);
 
         return new BoardResponse(
+                board.id(),
                 board.name(),
                 board.createdAt(),
                 board.updatedAt()
@@ -74,6 +76,7 @@ public class BoardService {
         board.setUpdatedAt(Instant.now());
 
         return new BoardResponse(
+                board.id(),
                 board.name(),
                 board.createdAt(),
                 board.updatedAt()
@@ -99,6 +102,7 @@ public class BoardService {
         boardRepository.save(board);
 
         return new BoardResponse(
+                board.id(),
                 board.name(),
                 board.createdAt(),
                 board.updatedAt()

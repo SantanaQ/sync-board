@@ -25,8 +25,18 @@ export default function ProjectListPage() {
     });
 
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [editingProject, setEditingProject] =
-        useState<ProjectListResponse | null>(null);
+    const [updateModalOpen, setUpdateModalOpen] = useState(false);
+    const [editingProject, setEditingProject] = useState<ProjectListResponse | null>(null);
+
+    const openEdit = (project : ProjectListResponse) => {
+        setEditingProject(project);
+        setUpdateModalOpen(true);
+    }
+
+    const closeEdit = () => {
+        setEditingProject(null);
+        setUpdateModalOpen(false);
+    }
 
     const handleDelete = async (project: ProjectListResponse) => {
         try {
@@ -64,7 +74,7 @@ export default function ProjectListPage() {
                 renderItem={(project) => (
                     <ProjectListItem
                         project={project}
-                        onEdit={() => setEditingProject(project)}
+                        onEdit={() => openEdit(project)}
                         onDelete={() => handleDelete(project)}
                     />
                 )}
@@ -78,9 +88,9 @@ export default function ProjectListPage() {
 
             {editingProject && (
                 <UpdateProjectModal
-                    open
+                    open={updateModalOpen}
                     project={editingProject}
-                    onClose={() => setEditingProject(null)}
+                    onClose={() => closeEdit()}
                     onUpdated={refresh}
                 />
             )}
