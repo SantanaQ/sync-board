@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import {useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useApiError } from "../../hooks/useApiError";
 
 import TempLogo from "../../assets/TempLogo";
-import {TextInput} from "../../components/form/TextInput.tsx";
-import {FormButton} from "../../components/form/FormButton.tsx";
+import { TextInput } from "../../components/form/TextInput";
+import { FormButton } from "../../components/form/FormButton";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -18,8 +18,7 @@ export default function LoginPage() {
 
     const location = useLocation();
 
-    const from =
-        location.state?.from?.pathname ?? "/dashboard";
+    const from = location.state?.from?.pathname ?? "/dashboard";
 
     const {
         fieldErrors,
@@ -29,7 +28,7 @@ export default function LoginPage() {
     } = useApiError();
 
     const handleLogin = async (
-        event: React.SubmitEvent<HTMLFormElement>
+        event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
 
@@ -51,7 +50,7 @@ export default function LoginPage() {
     };
 
     const handleEmailChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLInputElement>
     ) => {
         setEmail(event.target.value);
         clearFieldError("email");
@@ -65,47 +64,22 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="bg-gray-50 px-4 dark:bg-neutral-900 md:px-8">
+        <main className="bg-app px-4 md:px-8">
             <div className="flex min-h-screen flex-col items-center justify-center">
                 <div className="w-full max-w-md">
-                    <TempLogo
-                        className="
-                            mx-auto
-                            mb-8
-                            block
-                            min-h-32
-                            w-32
-                        "
-                    />
+                    <TempLogo className="mx-auto mb-8 block min-h-32 w-32" />
 
-                    <div
-                        className="
-                            rounded-lg
-                            border
-                            border-slate-300
-                            bg-white
-                            p-6
-                            shadow-xs
-                            dark:border-neutral-700
-                            dark:bg-neutral-800
-                            md:p-8
-                        "
-                    >
-                        <h1
-                            className="
-                                text-center
-                                text-3xl
-                                font-bold
-                                text-slate-900
-                                dark:text-slate-50
-                            "
-                        >
+                    <div className="card p-6 md:p-8">
+                        <h1 className="text-center text-2xl font-bold text-primary">
                             Sign in
                         </h1>
+                        <p className="section-description text-center mt-1">
+                            Welcome back! Please enter your details.
+                        </p>
 
                         <form
                             onSubmit={handleLogin}
-                            className="mt-10 space-y-6"
+                            className="mt-8 space-y-5"
                             noValidate
                         >
                             <TextInput
@@ -140,32 +114,12 @@ export default function LoginPage() {
                                 Sign in
                             </FormButton>
 
-                            <div
-                                className="
-                                    text-center
-                                    text-sm
-                                    text-slate-900
-                                    dark:text-slate-50
-                                "
-                            >
+                            <div className="text-center text-sm text-secondary pt-2">
                                 Don't have an account?
-
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        navigate("/register")
-                                    }
-                                    className="
-                                        ml-1
-                                        rounded
-                                        font-medium
-                                        text-blue-700
-                                        hover:underline
-                                        focus:outline-none
-                                        focus-visible:ring-2
-                                        focus-visible:ring-blue-500
-                                        dark:text-blue-500
-                                    "
+                                    onClick={() => navigate("/register")}
+                                    className="ml-1 font-medium text-accent hover:underline focus:outline-none"
                                 >
                                     Sign up
                                 </button>

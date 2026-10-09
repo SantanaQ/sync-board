@@ -1,21 +1,21 @@
-import TempLogo from "../../assets/TempLogo.tsx";
-import React, {type ChangeEvent, useState} from "react";
-import {useAuth} from "../../hooks/useAuth.ts";
-import {useNavigate} from "react-router-dom";
-import {useApiError} from "../../hooks/useApiError.ts";
-import {FormButton} from "../../components/form/FormButton.tsx";
-import {TextInput} from "../../components/form/TextInput.tsx";
+import React, { type ChangeEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../hooks/useAuth";
+import { useApiError } from "../../hooks/useApiError";
+
+import TempLogo from "../../assets/TempLogo";
+import { FormButton } from "../../components/form/FormButton";
+import { TextInput } from "../../components/form/TextInput";
 
 export default function RegisterPage() {
-
     const [formData, setFormData] = useState({
         displayName: "",
         email: "",
         password: "",
-        passwordConfirmation: ""
+        passwordConfirmation: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-
 
     const { register } = useAuth();
     const navigate = useNavigate();
@@ -44,18 +44,14 @@ export default function RegisterPage() {
             });
 
             navigate("/dashboard");
-
         } catch (error) {
             handleApiError(error);
         } finally {
             setIsSubmitting(false);
         }
+    };
 
-    }
-
-    const handleChange = (
-        event: ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target;
 
         setFormData((prev) => ({
@@ -68,49 +64,23 @@ export default function RegisterPage() {
         }
     };
 
-
     return (
-        <main className="bg-gray-50 px-4 dark:bg-neutral-900 md:px-8">
-            <div className="flex min-h-screen flex-col items-center justify-center">
+        <main className="bg-app px-4 md:px-8">
+            <div className="flex min-h-screen flex-col items-center justify-center py-12">
                 <div className="w-full max-w-md">
-                    <TempLogo
-                        className="
-                            mx-auto
-                            mb-8
-                            block
-                            min-h-32
-                            w-32
-                        "
-                    />
+                    <TempLogo className="mx-auto mb-8 block min-h-32 w-32" />
 
-                    <div
-                        className="
-                            rounded-lg
-                            border
-                            border-slate-300
-                            bg-white
-                            p-6
-                            shadow-xs
-                            dark:border-neutral-700
-                            dark:bg-neutral-800
-                            md:p-8
-                        "
-                    >
-                        <h1
-                            className="
-                                text-center
-                                text-3xl
-                                font-bold
-                                text-slate-900
-                                dark:text-slate-50
-                            "
-                        >
+                    <div className="card p-6 md:p-8">
+                        <h1 className="text-center text-2xl font-bold text-primary">
                             Sign up
                         </h1>
+                        <p className="section-description text-center mt-1">
+                            Create an account to get started.
+                        </p>
 
                         <form
                             onSubmit={handleRegister}
-                            className="mt-10 space-y-6"
+                            className="mt-8 space-y-5"
                             noValidate
                         >
                             <TextInput
@@ -162,7 +132,6 @@ export default function RegisterPage() {
                                 disabled={isSubmitting}
                             />
 
-
                             <FormButton
                                 type="submit"
                                 isLoading={isSubmitting}
@@ -171,32 +140,12 @@ export default function RegisterPage() {
                                 Create account
                             </FormButton>
 
-                            <div
-                                className="
-                                    text-center
-                                    text-sm
-                                    text-slate-900
-                                    dark:text-slate-50
-                                "
-                            >
+                            <div className="text-center text-sm text-secondary pt-2">
                                 Already have an account?
-
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        navigate("/login")
-                                    }
-                                    className="
-                                        ml-1
-                                        rounded
-                                        font-medium
-                                        text-blue-700
-                                        hover:underline
-                                        focus:outline-none
-                                        focus-visible:ring-2
-                                        focus-visible:ring-blue-500
-                                        dark:text-blue-500
-                                    "
+                                    onClick={() => navigate("/login")}
+                                    className="ml-1 font-medium text-accent hover:underline focus:outline-none"
                                 >
                                     Sign in
                                 </button>
