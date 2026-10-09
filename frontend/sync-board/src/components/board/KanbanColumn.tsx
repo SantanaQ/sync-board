@@ -1,13 +1,13 @@
-import type {Column} from "../../pages/board/BoardPage.tsx";
 import {Edit3, Plus, Trash2} from "lucide-react";
-import {KanbanCard} from "./KanbanCard.tsx";
+//import {KanbanCard} from "./KanbanCard.tsx";
 import DropdownMenu from "../ui/DropdownMenu.tsx";
 import {DropdownMenuItem} from "../ui/DropdownMenuItem.tsx";
+import type {BoardColumnResponse} from "../../api/types.ts";
 
 export function KanbanColumn({
                                  column,
                              }: {
-    column: Column;
+    column: BoardColumnResponse;
 }) {
     return (
         <section
@@ -28,7 +28,7 @@ export function KanbanColumn({
             <header className="flex shrink-0 items-center justify-between px-3 py-3">
                 <div className="flex items-center gap-2">
                     <h2 className="text-sm font-semibold text-primary">
-                        {column.title}
+                        {column.name}
                     </h2>
 
                     <span
@@ -41,7 +41,7 @@ export function KanbanColumn({
                             text-muted
                         "
                     >
-                        {column.cards.length}
+                        {/*column.cards.length*/} 12
                     </span>
                 </div>
 
@@ -66,12 +66,12 @@ export function KanbanColumn({
             <div className="flex flex-1 flex-col overflow-hidden px-2 pb-2">
 
                 <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-                    {column.cards.map((card, index) => (
+                    {/*column.cards.map((card, index) => (
                         <KanbanCard
                             key={`${card.id}-${index}`}
                             card={card}
                         />
-                    ))}
+                    ))*/}
                 </div>
 
                 {/* Add card Button */}

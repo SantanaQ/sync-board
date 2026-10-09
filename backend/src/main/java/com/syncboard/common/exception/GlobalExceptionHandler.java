@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorResponse> badCredentials(InvalidCredentialsException e) {
+    public ResponseEntity<ErrorResponse> invalidCredentials(InvalidCredentialsException e) {
         ErrorResponse response = new ErrorResponse(
                 ErrorCode.INVALID_CREDENTIALS,
                 e.getMessage(),

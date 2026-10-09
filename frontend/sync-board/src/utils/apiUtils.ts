@@ -1,4 +1,4 @@
-import {ApiError, type ApiErrorResponse} from "../api/ApiError.ts";
+import {ApiError, type ApiErrorResponse} from "../api/error/ApiError.ts";
 
 const getCsrfToken = (): string | undefined => {
     const cookie = document.cookie

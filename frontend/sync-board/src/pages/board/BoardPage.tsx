@@ -8,10 +8,13 @@ import {KanbanColumn} from "../../components/board/KanbanColumn.tsx";
 import DropdownMenu from "../../components/ui/DropdownMenu.tsx";
 import {DropdownMenuItem} from "../../components/ui/DropdownMenuItem.tsx";
 import {useEffect, useState} from "react";
-import type {BoardResponse} from "../../api/types.ts";
+import type {BoardColumnResponse, BoardResponse} from "../../api/types.ts";
 import * as boardClient from "../../api/boardClient.ts";
+import * as boardColumnClient from "../../api/boardColumnClient.ts";
 import UpdateBoardModal from "../../components/board/UpdateBoardModal.tsx";
 import DeleteBoardModal from "../../components/board/DeleteBoardModal.tsx";
+import CreateBoardColumnModal from "../../components/board/column/CreateBoardColumnModal.tsx";
+import {useToast} from "../../hooks/useToast.ts";
 
 export type Card = {
     id: string;
@@ -21,12 +24,7 @@ export type Card = {
     assignee?: string;
 };
 
-export type Column = {
-    id: string;
-    title: string;
-    cards: Card[];
-};
-
+/*
 const columns: Column[] = [
     {
         id: "todo",
@@ -102,28 +100,49 @@ const columns: Column[] = [
         ],
     },
 ];
+*/
 
 export default function BoardPage() {
     const { projectId, boardId } = useParams();
     const project = useLocation().state?.parent;
     const navigate = useNavigate();
+    const { showSuccess } = useToast();
 
     const [board, setBoard] = useState<BoardResponse | undefined>();
+    const [columns, setColumns] = useState<BoardColumnResponse[] | undefined>();
 
     const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [createColumnModalOpen, setCreateColumnModalOpen] = useState<boolean>(false);
 
-
-    const handleDelete = () => {
-        setDeleteModalOpen(true);
-    };
-
-    useEffect(() => {
+    const refresh = async () => {
         if (!projectId || !boardId) return;
 
         boardClient
             .getBoard(projectId, boardId)
             .then((board) => setBoard(board));
+
+        boardColumnClient
+            .getColumns(projectId, boardId)
+            .then((columns) => setColumns(columns));
+    }
+
+    const onCreateColumn = () => {
+        refresh().then(() => showSuccess("Successfully created column."))
+    }
+
+    const onUpdated = () => {
+        refresh().then(() => showSuccess("Successfully updated board."))
+    }
+
+    const onDeleted = () => {
+        navigate(`/projects/${projectId}`);
+        showSuccess("Successfully deleted board.")
+    }
+
+    useEffect(() => {
+        refresh()
+
     }, [projectId, boardId]);
 
     if (!board) return null;
@@ -160,7 +179,8 @@ export default function BoardPage() {
                                 <Search className="h-4 w-4"/>
                             </button>
 
-                            <button className="btn-primary">
+                            <button className="btn-primary"
+                                    onClick={() => setCreateColumnModalOpen(true)}>
                                 <Plus className="h-4 w-4"/>
                                 Add column
                             </button>
@@ -176,7 +196,7 @@ export default function BoardPage() {
                                     <DropdownMenuItem
                                         icon={<Trash2 className="h-4 w-4"/>}
                                         destructive
-                                        onClick={handleDelete}
+                                        onClick={() => setDeleteModalOpen(true)}
                                     >
                                         Delete board
                                     </DropdownMenuItem>
@@ -189,12 +209,17 @@ export default function BoardPage() {
 
             <main className="flex-1 overflow-x-auto overflow-y-hidden">
                 <div className="flex h-full gap-4 p-4 sm:p-6 lg:p-8">
-                    {columns.map((column) => (
-                        <KanbanColumn
-                            key={column.id}
-                            column={column}
-                        />
-                    ))}
+                    {columns && columns.length > 0 ? columns.map((column) => (
+                            <KanbanColumn
+                                key={column.id}
+                                column={column}
+                            />
+                        ))
+                        :
+                        <div className="px-5 py-8 text-center text-sm text-muted card w-full h-full">
+                            No columns yet...
+                        </div>
+                    }
                 </div>
             </main>
 
@@ -202,12 +227,18 @@ export default function BoardPage() {
                 open={updateModalOpen}
                 board={board}
                 onClose={() => setUpdateModalOpen(false)}
+                onUpdated={onUpdated}
             />
             <DeleteBoardModal
                 open={deleteModalOpen}
                 board={board}
                 onClose={() => setDeleteModalOpen(false)}
-                onDeleted={() => navigate(`/projects/${projectId}`)}
+                onDeleted={onDeleted}
+            />
+            <CreateBoardColumnModal
+                open={createColumnModalOpen}
+                onClose={() => setCreateColumnModalOpen(false)}
+                onCreated={onCreateColumn}
             />
 
         </div>

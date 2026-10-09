@@ -54,3 +54,17 @@ export type CreateBoardRequest = {
 export type UpdateBoardRequest = {
     name: string;
 }
+
+export type BoardColumnResponse = {
+    id: string;
+    name: string;
+    position: number
+}
+
+export type CreateBoardColumnRequest = {
+    name: string;
+}
+
+export type UpdateBoardColumnRequest = {
+    name: string;
+}

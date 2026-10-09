@@ -4,6 +4,7 @@ import * as authClient from "../api/authClient.ts";
 import * as userClient from "../../api/userClient.ts"
 import type {LoginRequest, RegistrationRequest} from "../api/authClient.ts";
 import { AuthContext } from "./AuthContext.ts";
+import {registerUnauthorizedHandler} from "../authErrorHandler.ts";
 
 
 export function AuthProvider({ children }: {children: ReactNode}) {
@@ -54,7 +55,6 @@ export function AuthProvider({ children }: {children: ReactNode}) {
                     authStatus: "authenticated",
                 });
             } catch {
-
                 setAuthState({
                     user: null,
                     authStatus: "unauthenticated",
@@ -64,6 +64,17 @@ export function AuthProvider({ children }: {children: ReactNode}) {
 
         initializeAuth();
     }, []);
+
+
+    useEffect(() => {
+        return registerUnauthorizedHandler(() => {
+            setAuthState({
+                user: null,
+                authStatus: "unauthenticated",
+            });
+        });
+    }, []);
+
 
     return (
         <AuthContext.Provider

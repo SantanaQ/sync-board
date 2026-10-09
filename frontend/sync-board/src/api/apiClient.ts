@@ -1,4 +1,5 @@
 import {assertResponseOk, headers} from "../utils/apiUtils.ts";
+import {handleUnauthorized} from "../auth/authErrorHandler.ts";
 
 const baseUrl = "/api";
 
@@ -9,7 +10,7 @@ export const get = async <T>(url: string): Promise<T> => {
         credentials: "include",
     });
 
-    await assertResponseOk(response);
+    await checkResponse(response);
 
     return response.json();
 };
@@ -25,7 +26,7 @@ export const post = async <T, B = unknown>(
         body: body ? JSON.stringify(body) : undefined,
     });
 
-    await assertResponseOk(response);
+    await checkResponse(response);
 
     return response.json();
 };
@@ -37,7 +38,7 @@ export const del = async (url: string): Promise<void> => {
         credentials: "include",
     })
 
-    await assertResponseOk(response);
+    await checkResponse(response);
 }
 
 export const put = async <T, B = unknown>(
@@ -51,10 +52,18 @@ export const put = async <T, B = unknown>(
         body: body ? JSON.stringify(body) : undefined,
     })
 
-    await assertResponseOk(response);
+    await checkResponse(response);
 
     return response.json();
 }
+
+const checkResponse = async (response: Response): Promise<void> => {
+    if (response.status === 401) {
+        handleUnauthorized();
+    }
+
+    await assertResponseOk(response);
+};
 
 
 

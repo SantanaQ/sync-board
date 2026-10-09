@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { ApiError } from "../api/ApiError";
-import { ErrorCode } from "../api/ErrorCode";
+import { ApiError } from "../api/error/ApiError.ts";
+import { ErrorCode } from "../api/error/ErrorCode.ts";
 import { useToast } from "./useToast";
 
 export function useApiError() {

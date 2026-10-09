@@ -30,10 +30,13 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            BearerTokenResolver bearerTokenResolver
+            BearerTokenResolver bearerTokenResolver,
+            JsonAuthenticationEntryPoint authenticationEntryPoint
     ) {
         return http
                 .csrf(CsrfConfigurer::spa)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS

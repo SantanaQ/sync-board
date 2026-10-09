@@ -9,4 +9,5 @@ public enum ErrorCode {
     UNAUTHORIZED,
     BUSINESS_RULE_VIOLATION,
     INTERNAL_SERVER_ERROR,
+    TOKEN_EXPIRED,
 }
