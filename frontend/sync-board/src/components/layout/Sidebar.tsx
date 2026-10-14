@@ -85,7 +85,7 @@ export default function Sidebar({
                     
                     bg-surface
                     
-                    shadow-xl
+                    shadow-lg
                     
                     transition-all
                     duration-200

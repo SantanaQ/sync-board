@@ -91,7 +91,7 @@ public class ProjectMemberService {
                 new ProjectMemberId(projectId, request.userId())
         )) {
             throw new ResourceAlreadyExistsException(
-                    "User is already a member of this project."
+                    user.displayName() + " is already a member of this project."
             );
         }
 

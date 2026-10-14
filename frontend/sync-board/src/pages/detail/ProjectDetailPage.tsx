@@ -3,12 +3,15 @@ import { Link, useParams } from "react-router-dom";
 import DetailPage from "./DetailPage";
 import * as projectClient from "../../api/projectClient"
 import * as boardClient from "../../api/boardClient"
+import * as memberClient from "../../api/projectMemberClient";
 import {useEffect, useState} from "react";
-import type {BoardListResponse, ProjectResponse} from "../../api/types.ts";
+import type {BoardListResponse, ProjectMemberResponse, ProjectResponse} from "../../api/types.ts";
 import UpdateProjectModal from "../../components/project/UpdateProjectModal.tsx";
 import CreateBoardModal from "../../components/board/CreateBoardModal.tsx";
 import {formatDateStr} from "../../utils/formatDate.ts";
 import {useToast} from "../../hooks/useToast.ts";
+import {MemberBadge} from "../../components/project/member/MemberBadge.tsx";
+import AddMemberModal from "../../components/project/member/AddMemberModal.tsx";
 
 export default function ProjectDetailPage() {
     const { projectId } = useParams();
@@ -16,9 +19,11 @@ export default function ProjectDetailPage() {
 
     const [project, setProject] = useState<ProjectResponse | undefined>();
     const [boards, setBoards] = useState<BoardListResponse[]>([]);
+    const [projectMembers, setProjectMembers] = useState<ProjectMemberResponse[]>([]);
 
     const [updateModalOpen, setUpdateModalOpen] = useState<boolean>(false);
     const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
+    const [addMemberModalOpen, setAddMemberModalOpen] = useState<boolean>(false);
 
     const refresh = async () => {
         if(!projectId) {
@@ -31,6 +36,10 @@ export default function ProjectDetailPage() {
 
         boardClient.getBoards(projectId).then((response) => {
             setBoards(response)
+        })
+
+        memberClient.getProjectMembers(projectId).then((response) => {
+            setProjectMembers(response);
         })
     }
 
@@ -46,6 +55,10 @@ export default function ProjectDetailPage() {
         refresh().then(() => showSuccess("Successfully created board."));
     }
 
+    const onAdded = () => {
+        refresh().then(() => showSuccess("Successfully added project member."));
+    }
+
 
     if (!project) {
         return null;
@@ -55,7 +68,7 @@ export default function ProjectDetailPage() {
         <>
             <DetailPage
                 title={project.name}
-                description={project.description}
+                description=""
                 backHref="/projects"
                 backLabel="Projects"
                 actions={
@@ -90,7 +103,7 @@ export default function ProjectDetailPage() {
                                     </h2>
 
                                     <p className="section-description">
-                                        Information about this project
+                                        Description of this project
                                     </p>
                                 </div>
                             </div>
@@ -111,7 +124,7 @@ export default function ProjectDetailPage() {
                                     </h2>
 
                                     <p className="section-description">
-                                        The boards for this project
+                                        Organize multiple units working on this project
                                     </p>
                                 </div>
                                 <button onClick={() => setCreateBoardModalOpen(true)} className="btn-primary">
@@ -180,7 +193,7 @@ export default function ProjectDetailPage() {
                                     </p>
 
                                     <p className="mt-1 text-sm font-medium text-primary">
-                                        {project?.name}
+                                        {project.name}
                                     </p>
                                 </div>
 
@@ -190,9 +203,50 @@ export default function ProjectDetailPage() {
                                     </p>
 
                                     <p className="mt-1 font-mono text-xs text-secondary">
-                                        {project?.id}
+                                        {project.id}
                                     </p>
                                 </div>
+                                <div>
+                                    <p className="text-xs text-muted">
+                                        Ownership
+                                    </p>
+
+                                    <p className="mt-1 font-mono text-xs text-secondary">
+                                        <MemberBadge member={
+                                            {
+                                                displayName: project.owner.displayName,
+                                                email: project.owner.email
+                                            }}
+                                        />
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                        <section className="card">
+                            <div className="card-header">
+                                <h2 className="section-title">
+                                    Members
+                                </h2>
+                                <button onClick={() => setAddMemberModalOpen(true)} className="btn-primary">
+                                <Plus className="h-4 w-4"/>
+                                    Add member
+                                </button>
+
+                            </div>
+
+                            <div className="space-y-4 px-5 pb-5">
+                                {projectMembers && projectMembers.length > 0 ? (
+                                    projectMembers.map((member) => (
+                                        <MemberBadge className="m-1" key={member.user.email} member={{
+                                            displayName: member.user.displayName,
+                                            email: member.user.email
+                                        }} />
+                                    ))
+                                ) : (
+                                    <div className="px-5 py-8 text-center text-sm text-muted">
+                                        no contributors yet...
+                                    </div>
+                                )}
                             </div>
                         </section>
                     </aside>
@@ -208,6 +262,11 @@ export default function ProjectDetailPage() {
                 open={createBoardModalOpen}
                 onClose={() => setCreateBoardModalOpen(false)}
                 onCreated={onCreated}
+            />
+            <AddMemberModal
+                open={addMemberModalOpen}
+                onClose={() => setAddMemberModalOpen(false)}
+                onCreated={onAdded}
             />
         </>
     );

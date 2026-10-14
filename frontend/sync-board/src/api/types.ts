@@ -68,3 +68,17 @@ export type CreateBoardColumnRequest = {
 export type UpdateBoardColumnRequest = {
     name: string;
 }
+
+export type ProjectMemberResponse = {
+    user: UserResponse;
+    role: string;
+}
+
+export type AddMemberRequest = {
+    userId: string;
+    role: string;
+}
+
+export type UpdateMemberRequest = {
+    role: string;
+}
