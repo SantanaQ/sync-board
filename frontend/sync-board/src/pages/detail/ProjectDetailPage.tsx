@@ -59,6 +59,10 @@ export default function ProjectDetailPage() {
         refresh().then(() => showSuccess("Successfully added project member."));
     }
 
+    const onUpdatedMember = () => {
+        refresh().then(() => showSuccess("Successfully updated project member."));
+    }
+
 
     if (!project) {
         return null;
@@ -214,9 +218,10 @@ export default function ProjectDetailPage() {
                                     <p className="mt-1 font-mono text-xs text-secondary">
                                         <MemberBadge member={
                                             {
-                                                displayName: project.owner.displayName,
-                                                email: project.owner.email
+                                                user: project.owner,
+                                                role: "OWNER"
                                             }}
+                                            enableModal={false}
                                         />
                                     </p>
                                 </div>
@@ -237,10 +242,13 @@ export default function ProjectDetailPage() {
                             <div className="space-y-4 px-5 pb-5">
                                 {projectMembers && projectMembers.length > 0 ? (
                                     projectMembers.map((member) => (
-                                        <MemberBadge className="m-1" key={member.user.email} member={{
-                                            displayName: member.user.displayName,
-                                            email: member.user.email
-                                        }} />
+                                        <MemberBadge
+                                            className="m-1"
+                                            key={member.user.email}
+                                            member={member}
+                                            enableModal={member.user.id !== project.owner.id}
+                                            onUpdated={onUpdatedMember}
+                                        />
                                     ))
                                 ) : (
                                     <div className="px-5 py-8 text-center text-sm text-muted">

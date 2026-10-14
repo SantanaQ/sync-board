@@ -10,8 +10,8 @@ export const getProjectMembers = async (projectId: string) =>
 export const addProjectMember = async (projectId: string, request: AddMemberRequest) =>
     post<ProjectMemberResponse>(`/projects/${projectId}/members`, request);
 
-export const updateProjectMember = async (projectId: string, request: UpdateMemberRequest) =>
-    put<ProjectMemberResponse>(`/projects/${projectId}/members`, request);
+export const updateProjectMember = async (projectId: string, userId: string, request: UpdateMemberRequest) =>
+    put<ProjectMemberResponse>(`/projects/${projectId}/members/${userId}`, request);
 
 export const removeProjectMember = async (projectId: string, userId: string) =>
     del(`/projects/${projectId}/members/${userId}`);

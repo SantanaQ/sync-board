@@ -1,10 +1,10 @@
 import React, {useState} from "react";
 import CreateModal from "../../modal/CreateModal";
-import {TextInput} from "../../form/TextInput.tsx";
 import {useApiError} from "../../../hooks/useApiError.ts";
 import {addProjectMember} from "../../../api/projectMemberClient.ts";
 import {useParams} from "react-router-dom";
 import {UserSearch} from "../../form/UserSearch.tsx";
+import {SelectInput} from "../../form/SelectInput.tsx";
 
 type AddMemberModalProps = {
     open: boolean;
@@ -31,7 +31,7 @@ export default function AddMemberModal({
     }
 
     const [userId, setUserId] = useState("");
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("ADMIN");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async () => {
@@ -58,7 +58,7 @@ export default function AddMemberModal({
     };
 
     const handleRoleChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLSelectElement>,
     ) => {
         setRole(event.target.value);
         clearFieldError("role");
@@ -94,15 +94,19 @@ export default function AddMemberModal({
                 }}
             />
 
-            <TextInput
+
+            <SelectInput
                 id="role"
                 label="Assigned role"
-                type="textarea"
+                required
+                items={[
+                    { label: "Admin", value: "ADMIN" },
+                    { label: "Member", value: "MEMBER" },
+                    { label: "Viewer", value: "VIEWER" },
+                ]}
                 value={role}
-                error={fieldErrors.role}
-                placeholder="..."
                 onChange={handleRoleChange}
-                disabled={isLoading}
+                error={fieldErrors.role}
             />
         </CreateModal>
     );

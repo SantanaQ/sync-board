@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import {useCallback} from "react";
 
 import { SearchInput } from "./SearchInput";
 import ProfileIcon from "../../assets/ProfileIcon";
