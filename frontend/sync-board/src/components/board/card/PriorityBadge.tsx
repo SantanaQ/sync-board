@@ -1,4 +1,4 @@
-import type {Card} from "../../pages/board/BoardPage.tsx";
+import type {Card} from "../../../pages/board/BoardPage.tsx";
 
 export function PriorityBadge({
                            priority,

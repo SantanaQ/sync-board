@@ -1,5 +1,4 @@
-import type {Card} from "../../pages/board/BoardPage.tsx";
-import {MoreHorizontal} from "lucide-react";
+import type {Card} from "../../../pages/board/BoardPage.tsx";
 import {PriorityBadge} from "./PriorityBadge.tsx";
 
 export function KanbanCard({
@@ -26,21 +25,6 @@ export function KanbanCard({
                 <h3 className="text-sm font-medium leading-5 text-primary">
                     {card.title}
                 </h3>
-
-                <button
-                    type="button"
-                    className="
-                        icon-button
-                        h-6 w-6
-                        shrink-0
-                        opacity-0
-                        transition-opacity
-                        group-hover:opacity-100
-                    "
-                    aria-label="Kartenoptionen"
-                >
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                </button>
             </div>
 
             {card.description && (
@@ -51,7 +35,7 @@ export function KanbanCard({
 
             <div className="mt-3 flex items-center justify-between gap-2">
                 {card.priority && (
-                    <PriorityBadge priority={card.priority} />
+                    <PriorityBadge priority={card.priority}/>
                 )}
 
                 {card.assignee && (

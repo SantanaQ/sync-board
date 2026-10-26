@@ -35,7 +35,7 @@ public class CardController {
     }
 
     @GetMapping
-    public List<CardListResponse> getCards(
+    public List<CardResponse> getCards(
             @PathVariable("projectId") UUID projectId,
             @PathVariable("boardId") UUID boardId,
             @PathVariable("columnId") UUID columnId

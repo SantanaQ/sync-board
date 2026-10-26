@@ -6,9 +6,7 @@ import type {ProjectMemberResponse} from "../../../api/types.ts";
 interface MemberBadgeProps {
     member: ProjectMemberResponse;
     className?: string;
-    /** Optional: Wenn übergeben, wird das Modal NICHT intern geöffnet, sondern dieser Callback ausgeführt */
     onClick?: () => void;
-    /** Ob das interne Modal überhaupt aktiv sein soll (Standard: true, wenn kein onClick da ist) */
     enableModal?: boolean;
     onUpdated?: () => void | Promise<void>;
 }

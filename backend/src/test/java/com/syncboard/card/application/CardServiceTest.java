@@ -141,7 +141,7 @@ public class CardServiceTest {
         when(cardRepository.findAllInHierarchy(projectId, boardId, columnId))
                 .thenReturn(cards);
 
-        List<CardListResponse> responses = cardService.getCards(projectId, boardId, columnId);
+        List<CardResponse> responses = cardService.getCards(projectId, boardId, columnId);
         assertThat(responses).hasSize(2);
     }
 

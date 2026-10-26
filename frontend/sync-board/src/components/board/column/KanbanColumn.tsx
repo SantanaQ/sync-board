@@ -1,14 +1,53 @@
 import {Edit3, Plus, Trash2} from "lucide-react";
 //import {KanbanCard} from "./KanbanCard.tsx";
-import DropdownMenu from "../ui/DropdownMenu.tsx";
-import {DropdownMenuItem} from "../ui/DropdownMenuItem.tsx";
-import type {BoardColumnResponse} from "../../api/types.ts";
+import DropdownMenu from "../../ui/DropdownMenu.tsx";
+import {DropdownMenuItem} from "../../ui/DropdownMenuItem.tsx";
+import type {BoardColumnResponse, CardResponse} from "../../../api/types.ts";
+import UpdateBoardColumnModal from "./UpdateBoardColumnModal.tsx";
+import DeleteBoardColumnModal from "./DeleteBoardColumnModal.tsx";
+import {useEffect, useState} from "react";
+import CreateCardModal from "../card/CreateCardModal.tsx";
+import {useParams} from "react-router-dom";
+import {useToast} from "../../../hooks/useToast.ts";
+import * as cardClient from "../../../api/cardClient.ts";
+import {KanbanCard} from "../card/KanbanCard.tsx";
 
 export function KanbanColumn({
                                  column,
                              }: {
     column: BoardColumnResponse;
 }) {
+
+    const { showSuccess } = useToast();
+    const { projectId, boardId } = useParams();
+
+    const [cards, setCards] = useState<CardResponse[]>([]);
+
+    const [updateModalOpen, setUpdateModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [createCardModalOpen, setCreateCardModalOpen] = useState(false);
+
+    const refresh = async () => {
+        if(!projectId || !boardId) {
+            return;
+        }
+
+        cardClient.getCards(projectId, boardId, column.id).then((cards) => {
+            setCards(cards);
+        })
+
+
+    }
+
+    useEffect(() => {
+        refresh();
+    }, []);
+
+    const onCreated = () => {
+        refresh().then(() => showSuccess("Successfully created card."));
+    }
+
+
     return (
         <section
             className="
@@ -48,14 +87,14 @@ export function KanbanColumn({
                 <DropdownMenu>
                     <DropdownMenuItem
                         icon={<Edit3 className="h-4 w-4"/>}
-                        onClick={() => {}}
+                        onClick={() => setUpdateModalOpen(true)}
                     >
                         Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         icon={<Trash2 className="h-4 w-4"/>}
                         destructive
-                        onClick={() => {}}
+                        onClick={() => setDeleteModalOpen(true)}
                     >
                         Delete
                     </DropdownMenuItem>
@@ -66,12 +105,12 @@ export function KanbanColumn({
             <div className="flex flex-1 flex-col overflow-hidden px-2 pb-2">
 
                 <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-                    {/*column.cards.map((card, index) => (
+                    {cards.map((card, index) => (
                         <KanbanCard
                             key={`${card.id}-${index}`}
                             card={card}
                         />
-                    ))*/}
+                    ))}
                 </div>
 
                 {/* Add card Button */}
@@ -87,11 +126,26 @@ export function KanbanColumn({
                         hover:bg-surface
                         hover:text-primary
                     "
+                    onClick={() => setCreateCardModalOpen(true)}
                 >
                     <Plus className="h-4 w-4" />
                     Add card
                 </button>
             </div>
+            <UpdateBoardColumnModal
+                open={updateModalOpen}
+                column={column}
+                onClose={() => setUpdateModalOpen(false)} />
+            <DeleteBoardColumnModal
+                open={deleteModalOpen}
+                column={column}
+                onClose={() => setDeleteModalOpen(false)} />
+            <CreateCardModal
+                open={createCardModalOpen}
+                column={column}
+                onClose={() => setCreateCardModalOpen(false)}
+                onCreated={onCreated}
+            />
         </section>
     );
 }

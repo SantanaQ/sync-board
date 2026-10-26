@@ -47,7 +47,7 @@ public class CardService {
         return toResponse(card);
     }
 
-    public List<CardListResponse> getCards(
+    public List<CardResponse> getCards(
             UUID projectId,
             UUID boardId,
             UUID columnId
@@ -58,11 +58,14 @@ public class CardService {
                 .findAllInHierarchy(projectId, boardId, columnId)
                 .stream()
                 .map(card ->
-                        new CardListResponse(
+                        new CardResponse(
                                 card.id(),
+                                card.column().id(),
                                 card.title(),
                                 card.description(),
-                                card.position()
+                                card.position(),
+                                card.createdAt(),
+                                card.updatedAt()
                         )
                 ).toList();
     }

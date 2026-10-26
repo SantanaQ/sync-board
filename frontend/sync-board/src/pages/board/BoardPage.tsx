@@ -4,7 +4,7 @@ import {
     Search, Trash2,
 } from "lucide-react";
 import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
-import {KanbanColumn} from "../../components/board/KanbanColumn.tsx";
+import {KanbanColumn} from "../../components/board/column/KanbanColumn.tsx";
 import DropdownMenu from "../../components/ui/DropdownMenu.tsx";
 import {DropdownMenuItem} from "../../components/ui/DropdownMenuItem.tsx";
 import {useEffect, useState} from "react";
@@ -216,7 +216,7 @@ export default function BoardPage() {
                             />
                         ))
                         :
-                        <div className="px-5 py-8 text-center text-sm text-muted card w-full h-full">
+                        <div className="px-5 py-8 bg-surface-muted text-center text-sm text-muted card w-full h-full">
                             No columns yet...
                         </div>
                     }

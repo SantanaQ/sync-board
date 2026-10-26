@@ -82,3 +82,24 @@ export type AddMemberRequest = {
 export type UpdateMemberRequest = {
     role: string;
 }
+
+export type CardResponse = {
+    id: string;
+    columnId: string;
+    title: string;
+    description: string;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type CreateCardRequest = {
+    title: string;
+    description: string;
+}
+
+export type UpdateCardRequest = {
+    title: string;
+    description: string;
+    version: number;
+}
